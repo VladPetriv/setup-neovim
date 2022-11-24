@@ -71,12 +71,12 @@ func (v validation) ValidateRepoFiles(path string) error {
 			continue
 		}
 
-		log.Warn().Msgf("repository didn't contains base files[%s] for neovim configuration", file)
+		log.Warn().Msgf("repository didn't contains base files[%s] for nvim configuration", file)
 		errCount++
 	}
 
 	if errCount > 1 {
-		return fmt.Errorf("repository didn't contains base files for neovim configuration")
+		return fmt.Errorf("repository didn't contains base files for nvim configuration")
 	}
 
 	return nil
@@ -90,7 +90,7 @@ func (v validation) ValidateConsoleUtilities() map[string]string {
 		cmd := exec.Command(util, "--version")
 
 		if err := cmd.Run(); err != nil {
-			errors[util] = fmt.Sprintf("Please install %s before using setup neovim util", util)
+			errors[util] = fmt.Sprintf("Please install %s before using setup nvim util", util)
 		}
 	}
 
