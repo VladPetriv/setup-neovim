@@ -10,7 +10,7 @@ type Services interface {
 	// MoveConfigDirectory moves repository directory into .config directory
 	MoveConfigDirectory() error
 	// ProcessPackageManagers ask user about package managers and install them if needed
-	ProcessPackageManagers() error
+	ProcessPackageManagers() (string, error)
 	// CompleteSetup runs nvim with specific flag that depends on package manager
-	CompleteSetup() error
+	CompleteSetup(packageManager string) error
 }

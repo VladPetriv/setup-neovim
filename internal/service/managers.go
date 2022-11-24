@@ -6,40 +6,40 @@ import (
 	"os/exec"
 )
 
-func (s service) ProcessPackageManagers() error {
+func (s service) ProcessPackageManagers() (string, error) {
 	haveInstalledPackageManagers, err := s.input.GetInput("Do you have any package managers installed?(y/n)")
 	if err != nil {
-		return fmt.Errorf("failed to get user input: %w", err)
+		return "", fmt.Errorf("failed to get user input: %w", err)
 	}
 
 	switch haveInstalledPackageManagers {
 	case "n":
 		packageManager, err := s.input.GetInput("Choose package manager(packer/vim-plug)")
 		if err != nil {
-			return fmt.Errorf("failed to get user input: %w", err)
+			return "", fmt.Errorf("failed to get user input: %w", err)
 		}
 
 		switch packageManager {
 		case "packer":
 			err := installPacker()
 			if err != nil {
-				return fmt.Errorf("install packer: %w", err)
+				return "", fmt.Errorf("install packer: %w", err)
 			}
-			return nil
+			return "packer", nil
 
 		case "vim-plug":
 			err := installVimPlug()
 			if err != nil {
-				return fmt.Errorf("install vim-plug: %w", err)
+				return "plug", fmt.Errorf("install vim-plug: %w", err)
 			}
-			return nil
+			return "", nil
 		default:
-			return fmt.Errorf("please choose valid package manager(packer/vim-plug): %s", packageManager)
+			return "", fmt.Errorf("please choose valid package manager(packer/vim-plug): %s", packageManager)
 		}
 	case "y":
-		return nil
+		return "", nil
 	default:
-		return fmt.Errorf("please enter valid answer(y/n): %s", haveInstalledPackageManagers)
+		return "", fmt.Errorf("please enter valid answer(y/n): %s", haveInstalledPackageManagers)
 	}
 }
 

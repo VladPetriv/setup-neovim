@@ -13,6 +13,11 @@ func (s service) MoveConfigDirectory() error {
 
 	err = os.Rename("./nvim", fmt.Sprintf("%s/.config/nvim", homeeDir))
 	if err != nil {
+		err := os.Remove("./nvim")
+		if err != nil {
+			return fmt.Errorf("moving config failed, failed to remove repository: %w", err)
+		}
+
 		return fmt.Errorf("failed to move repository into .config directory: %w", err)
 	}
 

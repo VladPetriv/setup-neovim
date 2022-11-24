@@ -39,13 +39,13 @@ func Run(service service.Services, logger *logger.Logger) {
 	}
 
 	time.Sleep(_commandTimeout)
-	err = service.ProcessPackageManagers()
+	packageManger, err := service.ProcessPackageManagers()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Process package managers failed! Please try again...")
 	}
 
 	time.Sleep(_commandTimeout)
-	err = service.CompleteSetup()
+	err = service.CompleteSetup(packageManger)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Setup failed! Please try again...")
 	}

@@ -31,8 +31,14 @@ func (s service) CheckUtilStatus() map[string]string {
 	return s.validator.ValidateConsoleUtilities()
 }
 
-func (s service) CompleteSetup() error {
-	cmd := exec.Command("nvim", "+PackerSync")
+func (s service) CompleteSetup(packageManager string) error {
+	// set default package manager to packer
+	args := "+PackerSync"
+	if packageManager == "vim-plug" {
+		args = "+PlugInstall"
+	}
+
+	cmd := exec.Command("nvim", args)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to complete setup: %w", err)
 	}
