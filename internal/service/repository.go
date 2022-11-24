@@ -3,11 +3,16 @@ package service
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 )
 
 func (s service) CloneAndValidateRepository(url string) error {
+	if isContainsSshURL(url) {
+		return fmt.Errorf("sorry we don't support ssh urls")
+	}
+
 	_, err := git.PlainClone("nvim", false, &git.CloneOptions{
 		URL:      url,
 		Progress: os.Stdout,
@@ -27,4 +32,8 @@ func (s service) CloneAndValidateRepository(url string) error {
 	}
 
 	return nil
+}
+
+func isContainsSshURL(url string) bool {
+	return strings.Contains(url, "git@")
 }
