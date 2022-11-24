@@ -56,7 +56,7 @@ func Test_ValidateRepoFiles(t *testing.T) {
 		{
 			name:        "repository didn't contains valid files",
 			input:       "../",
-			expectedErr: fmt.Errorf("repository didn't contains base files for neovim configuration"),
+			expectedErr: fmt.Errorf("repository didn't contains base files for nvim configuration"),
 		},
 	}
 
