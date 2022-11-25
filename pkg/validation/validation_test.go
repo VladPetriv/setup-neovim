@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/VladPetriv/setup-neovim/pkg/logger"
 	"github.com/VladPetriv/setup-neovim/pkg/validation"
 	"github.com/stretchr/testify/assert"
 )
 
-var testValidator = validation.New(logger.Get())
+var testValidator = validation.New()
 
 func Test_ValidateURL(t *testing.T) {
 	tests := []struct {

@@ -1,53 +1,62 @@
 package app
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/VladPetriv/setup-neovim/internal/service"
-	"github.com/VladPetriv/setup-neovim/pkg/logger"
+	"github.com/VladPetriv/setup-neovim/pkg/colors"
 )
 
 // _commandTimeout represents timeout that should be after completing the previous function
 var _commandTimeout = 1 * time.Second
 
-func Run(service service.Services, logger *logger.Logger) {
+func Run(service service.Services) {
 	errs := service.CheckUtilStatus()
 	if len(errs) >= 1 {
-		logger.Fatal().Interface("errors", errs).Msg("Check for console utilities failed! Please try again...")
-	} else {
-		logger.Info().Msg("All utilities are installed...")
+		colors.Red(fmt.Sprintf("Errors: %v\n", errs))
+		os.Exit(1)
 	}
+	colors.Green("All utilities are installed....")
 
 	time.Sleep(_commandTimeout)
 	url, err := service.ProcessUserURL()
 	if err != nil {
-		logger.Fatal().Err(err).Msg("Process URL failed! Please try again...")
+		colors.Red(fmt.Sprintf("Validation for URL failed! Please try again... [%v]\n", err))
+		os.Exit(1)
 	}
-	logger.Info().Msg("URL are valid...")
+	colors.Green("URL is valid...")
 
 	time.Sleep(_commandTimeout)
 	err = service.CloneAndValidateRepository(url)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("Process repository failed! Please try again...")
+		colors.Red(fmt.Sprintf("Failed to clone repository or repository didn't have base files for nvim configuration: [%v]\n", err))
+		os.Exit(1)
 	}
-	logger.Info().Msg("Repository successfully cloned and validated...")
+	colors.Green("Repository successfully cloned and checked for base files")
 
 	time.Sleep(_commandTimeout)
 	err = service.MoveConfigDirectory()
 	if err != nil {
-		logger.Fatal().Err(err).Msg("Failed to move repository! Please try again...")
+		colors.Red(fmt.Sprintf("Failed to move repository to .config directory! Please try again... [%v]\n", err))
+		os.Exit(1)
 	}
+	colors.Green("Successfully moved repository to .config directory...")
 
 	time.Sleep(_commandTimeout)
 	packageManger, err := service.ProcessPackageManagers()
 	if err != nil {
-		logger.Fatal().Err(err).Msg("Process package managers failed! Please try again...")
+		colors.Red(fmt.Sprintf("Failed to install package managers. Please try again... [%v]\n", err))
+		os.Exit(1)
 	}
+	colors.Green(fmt.Sprintf("%s successfully installed", packageManger))
 
 	time.Sleep(_commandTimeout)
 	err = service.CompleteSetup(packageManger)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("Setup failed! Please try again...")
+		colors.Red(fmt.Sprintf("Failed to run nvim with %s! Please try to run it manually... ", err))
+		os.Exit(1)
 	}
-	logger.Info().Msg("Editor successfully configured!")
+	colors.Green("Nvim successfully configured!")
 }

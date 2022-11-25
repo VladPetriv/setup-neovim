@@ -6,25 +6,17 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/VladPetriv/setup-neovim/pkg/logger"
 )
 
-type validation struct {
-	log *logger.Logger
-}
+type validation struct{}
 
 var _ Validator = (*validation)(nil)
 
-func New(log *logger.Logger) *validation {
-	return &validation{
-		log: log,
-	}
+func New() *validation {
+	return &validation{}
 }
 
 func (v validation) ValidateURL(url string) error {
-	log := v.log
-
 	hosts := [2]string{"github.com", "gitlab.com"}
 	errCount := 0
 
@@ -32,8 +24,6 @@ func (v validation) ValidateURL(url string) error {
 		if strings.Contains(url, host) {
 			continue
 		}
-
-		log.Warn().Msgf("url didn't contains %s host", host)
 
 		errCount++
 	}
@@ -46,13 +36,11 @@ func (v validation) ValidateURL(url string) error {
 }
 
 func (v validation) ValidateRepoFiles(path string) error {
-	log := v.log
-
 	var data string
 
 	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
-			return fmt.Errorf("list repository files: %w", err)
+			return fmt.Errorf("failed to get repository files: %w", err)
 		}
 
 		data += fmt.Sprintf(" %s", info.Name())
@@ -60,18 +48,15 @@ func (v validation) ValidateRepoFiles(path string) error {
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("get repository files: %w", err)
+		return fmt.Errorf("failed to get repository files: %w", err)
 	}
 
 	baseFiles := [2]string{"init.lua", "init.vim"}
 	errCount := 0
-
 	for _, file := range baseFiles {
 		if strings.Contains(data, file) {
 			continue
 		}
-
-		log.Warn().Msgf("repository didn't contains base files[%s] for nvim configuration", file)
 		errCount++
 	}
 
