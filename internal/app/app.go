@@ -23,7 +23,8 @@ func Run(service service.Services) {
 	time.Sleep(_commandTimeout)
 	url, err := service.ProcessUserURL()
 	if err != nil {
-		colors.Red(fmt.Sprintf("Validation for URL failed! Please try again... [%v]\n", err))
+		colors.Red("Validation for URL failed! Please try again... ")
+		colors.Red(fmt.Sprintf("Error: %v\n", err))
 		os.Exit(1)
 	}
 	colors.Green("URL is valid...")
@@ -31,7 +32,8 @@ func Run(service service.Services) {
 	time.Sleep(_commandTimeout)
 	err = service.CloneAndValidateRepository(url)
 	if err != nil {
-		colors.Red(fmt.Sprintf("Failed to clone repository or repository didn't have base files for nvim configuration: [%v]\n", err))
+		colors.Red("Failed to clone repository or repository didn't have base files for nvim configuration")
+		colors.Red(fmt.Sprintf("Error: %v\n", err))
 		os.Exit(1)
 	}
 	colors.Green("Repository successfully cloned and checked for base files")
@@ -39,7 +41,8 @@ func Run(service service.Services) {
 	time.Sleep(_commandTimeout)
 	err = service.MoveConfigDirectory()
 	if err != nil {
-		colors.Red(fmt.Sprintf("Failed to move repository to .config directory! Please try again... [%v]\n", err))
+		colors.Red("Failed to move repository to .config directory! Please try again... ")
+		colors.Red(fmt.Sprintf("Error: %v\n", err))
 		os.Exit(1)
 	}
 	colors.Green("Successfully moved repository to .config directory...")
@@ -47,7 +50,8 @@ func Run(service service.Services) {
 	time.Sleep(_commandTimeout)
 	packageManger, err := service.ProcessPackageManagers()
 	if err != nil {
-		colors.Red(fmt.Sprintf("Failed to install package managers. Please try again... [%v]\n", err))
+		colors.Red("Failed to install package managers. Please try again...")
+		colors.Red(fmt.Sprintf("Error: %v\n", err))
 		os.Exit(1)
 	}
 	colors.Green(fmt.Sprintf("%s successfully installed", packageManger))
