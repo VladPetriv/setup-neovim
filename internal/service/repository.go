@@ -23,8 +23,8 @@ func (s service) CloneAndValidateRepository(url string) error {
 
 	err = s.validator.ValidateRepoFiles("nvim")
 	if err != nil {
-		err := os.RemoveAll("nvim")
-		if err != nil {
+		removeErr := os.RemoveAll("nvim")
+		if removeErr != nil {
 			return fmt.Errorf("repository validation failed, failed to remove repository: %w", err)
 		}
 
