@@ -55,7 +55,7 @@ func Run(service service.Services) {
 	time.Sleep(_commandTimeout)
 	err = service.CompleteSetup(packageManger)
 	if err != nil {
-		colors.Red(fmt.Sprintf("Failed to run nvim with %s! Please try to run it manually... ", err))
+		colors.Red(fmt.Sprintf("Failed to run nvim with %s installation command! Please try to run it manually... ", packageManger))
 		os.Exit(1)
 	}
 	colors.Green("Nvim successfully configured!")
