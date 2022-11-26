@@ -1,52 +1,67 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/VladPetriv/setup-neovim/internal/models"
+	"github.com/VladPetriv/setup-neovim/pkg/input"
 )
 
-func (s service) ProcessPackageManagers() (string, error) {
-	haveInstalledPackageManagers, err := s.input.GetInput("Do you have any package managers installed?(y/n)")
+var ErrEnterValidAnswer = errors.New("please enter valid answer")
+
+func (s service) ProcessPackageManagers() (models.PackageManager, error) {
+	fmt.Print("Do you have any package managers installed?(y/n): ") //nolint
+
+	haveInstalledPackageManagers, err := s.input.GetInput()
 	if err != nil {
 		return "", fmt.Errorf("failed to get user input: %w", err)
 	}
 
 	switch haveInstalledPackageManagers {
 	case "n":
-		packageManager, err := s.input.GetInput("Choose package manager(packer/vim-plug)")
-		if err != nil {
-			return "", fmt.Errorf("failed to get user input: %w", err)
-		}
-
-		switch packageManager {
-		case "packer":
-			err := installPacker()
-			if err != nil {
-				return "", fmt.Errorf("install packer: %w", err)
-			}
-			return "packer", nil
-
-		case "vim-plug":
-			err := installVimPlug()
-			if err != nil {
-				return "plug", fmt.Errorf("install vim-plug: %w", err)
-			}
-			return "", nil
-		default:
-			return "", fmt.Errorf("please choose valid package manager(packer/vim-plug): %s", packageManager)
-		}
+		return installPackageManager(s.input)
 	case "y":
 		return "", nil
 	default:
-		return "", fmt.Errorf("please enter valid answer(y/n): %s", haveInstalledPackageManagers)
+		return "", ErrEnterValidAnswer
+	}
+}
+
+func installPackageManager(input input.Inputter) (models.PackageManager, error) {
+	fmt.Print("Choose package manager(packer/vim-plug): ") //nolint
+
+	packageManager, err := input.GetInput()
+	if err != nil {
+		return "", fmt.Errorf("failed to get user input: %w", err)
+	}
+
+	switch models.PackageManager(packageManager) {
+	case models.Packer:
+		err := installPacker()
+		if err != nil {
+			return "", fmt.Errorf("install packer error: %w", err)
+		}
+
+		return models.Packer, nil
+	case models.VimPlug:
+		err := installVimPlug()
+		if err != nil {
+			return "", fmt.Errorf("install vim-plug error: %w", err)
+		}
+
+		return models.VimPlug, nil
+	default:
+		return "", ErrEnterValidAnswer
 	}
 }
 
 func installVimPlug() error {
 	file, err := os.Create("vim-plug.sh")
 	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
+		return fmt.Errorf("create sh file for install script error: %w", err)
 	}
 
 	_, err = file.Write([]byte(
@@ -57,17 +72,17 @@ func installVimPlug() error {
     `,
 	))
 	if err != nil {
-		return fmt.Errorf("failed to create sh file for installing vim-plug: %w", err)
+		return fmt.Errorf("write to sh file error: %w", err)
 	}
 
 	cmd := exec.Command("/bin/sh", "vim-plug.sh")
 	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("failed to install vim-plug: %w", err)
+		return fmt.Errorf("run sh file error: %w", err)
 	}
 
 	err = os.Remove("./vim-plug.sh")
 	if err != nil {
-		return fmt.Errorf("failed to remove file after installing: %w", err)
+		return fmt.Errorf("remove sh file error: %w", err)
 	}
 
 	return nil
@@ -76,7 +91,7 @@ func installVimPlug() error {
 func installPacker() error {
 	file, err := os.Create("packer.sh")
 	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
+		return fmt.Errorf("create file for install script error: %w", err)
 	}
 
 	_, err = file.Write([]byte(
@@ -87,17 +102,17 @@ func installPacker() error {
     `,
 	))
 	if err != nil {
-		return fmt.Errorf("failed to create sh file for installing packer: %w", err)
+		return fmt.Errorf("write to sh file error: %w", err)
 	}
 
 	cmd := exec.Command("/bin/sh", "packer.sh")
 	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("failed to install packer: %w", err)
+		return fmt.Errorf("run sh file error: %w", err)
 	}
 
 	err = os.Remove("./packer.sh")
 	if err != nil {
-		return fmt.Errorf("failed to remove file after installing: %w", err)
+		return fmt.Errorf("remove sh file error: %w", err)
 	}
 
 	return nil
