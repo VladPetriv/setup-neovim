@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os/exec"
@@ -8,18 +9,23 @@ import (
 	"strings"
 )
 
+var (
+	ErrURLContainsInvalidHost  = errors.New("url contains invalid host")
+	ErrNoBaseFilesInRepository = errors.New("repository didn't contains base files for nvim configuration")
+)
+
 type validation struct{}
 
 var _ Validator = (*validation)(nil)
 
-func New() *validation {
+func New() *validation { //nolint
 	return &validation{}
 }
 
 func (v validation) ValidateURL(url string) error {
-	hosts := [2]string{"github.com", "gitlab.com"}
-	errCount := 0
+	var errCount int
 
+	hosts := [2]string{"github.com", "gitlab.com"}
 	for _, host := range hosts {
 		if strings.Contains(url, host) {
 			continue
@@ -29,48 +35,59 @@ func (v validation) ValidateURL(url string) error {
 	}
 
 	if errCount > 1 {
-		return fmt.Errorf("url contains invalid host: %s", url)
+		return ErrURLContainsInvalidHost
 	}
 
 	return nil
 }
 
 func (v validation) ValidateRepoFiles(path string) error {
-	var data string
+	var errCount int
 
-	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			return fmt.Errorf("failed to get repository files: %w", err)
-		}
-
-		data += fmt.Sprintf(" %s", info.Name())
-
-		return nil
-	})
+	files, err := getRepositoryFiles(path)
 	if err != nil {
-		return fmt.Errorf("failed to get repository files: %w", err)
+		return fmt.Errorf("failed to get list of repository files: %w", err)
 	}
 
 	baseFiles := [2]string{"init.lua", "init.vim"}
-	errCount := 0
 	for _, file := range baseFiles {
-		if strings.Contains(data, file) {
+		if strings.Contains(files, file) {
 			continue
 		}
+
 		errCount++
 	}
 
 	if errCount > 1 {
-		return fmt.Errorf("repository didn't contains base files for nvim configuration")
+		return ErrNoBaseFilesInRepository
 	}
 
 	return nil
 }
 
+func getRepositoryFiles(path string) (string, error) {
+	var files string
+
+	err := filepath.Walk(path, func(_ string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("walk in repository error: %w", err)
+		}
+
+		files += fmt.Sprintf(" %s", info.Name())
+
+		return nil
+	})
+	if err != nil {
+		return "", fmt.Errorf("get list of files error: %w", err)
+	}
+
+	return files, nil
+}
+
 func (v validation) ValidateConsoleUtilities() map[string]string {
 	errors := make(map[string]string)
-	utils := [2]string{"nvim", "git"}
 
+	utils := [2]string{"nvim", "git"}
 	for _, util := range utils {
 		cmd := exec.Command(util, "--version")
 
