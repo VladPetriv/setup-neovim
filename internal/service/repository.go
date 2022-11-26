@@ -55,7 +55,7 @@ func createPublicSSHKeysFromFile(input input.Inputter) (*ssh.PublicKeys, error) 
 
 	fmt.Print("Enter path to your ssh file(.ssh/id_ed3122): ") //nolint
 
-	keyPath, err := input.GetInput()
+	keyPath, err := input.GetInput(os.Stdin)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user input: %w", err)
 	}

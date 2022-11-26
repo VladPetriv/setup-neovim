@@ -1,7 +1,9 @@
 package input
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 )
 
 type input struct{}
@@ -12,11 +14,11 @@ func New() *input { //nolint
 	return &input{}
 }
 
-func (i input) GetInput() (string, error) {
-	var data string
-	if _, err := fmt.Scanln(&data); err != nil {
+func (i input) GetInput(stdin io.Reader) (string, error) {
+	reader := bufio.NewReader(stdin)
+	data, err := reader.ReadString('\n')
+	if err != nil {
 		return "", fmt.Errorf("get input error: %w", err)
 	}
-
-	return data, nil
+	return data, err
 }

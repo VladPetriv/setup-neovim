@@ -15,7 +15,7 @@ var ErrEnterValidAnswer = errors.New("please enter valid answer")
 func (s service) ProcessPackageManagers() (models.PackageManager, error) {
 	fmt.Print("Do you have any package managers installed?(y/n): ") //nolint
 
-	haveInstalledPackageManagers, err := s.input.GetInput()
+	haveInstalledPackageManagers, err := s.input.GetInput(os.Stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to get user input: %w", err)
 	}
@@ -33,7 +33,7 @@ func (s service) ProcessPackageManagers() (models.PackageManager, error) {
 func installPackageManager(input input.Inputter) (models.PackageManager, error) {
 	fmt.Print("Choose package manager(packer/vim-plug): ") //nolint
 
-	packageManager, err := input.GetInput()
+	packageManager, err := input.GetInput(os.Stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to get user input: %w", err)
 	}

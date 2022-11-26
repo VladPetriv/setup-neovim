@@ -1,5 +1,7 @@
 package input
 
+import "io"
+
 type Inputter interface {
-	GetInput() (string, error)
+	GetInput(stdin io.Reader) (string, error)
 }
