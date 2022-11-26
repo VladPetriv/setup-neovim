@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -10,14 +11,14 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
-func (s service) CloneAndValidateRepository(url string) error {
+func (s service) CloneAndValidateRepository(url string, stdin io.Reader) error {
 	cloneOptions := &git.CloneOptions{ //nolint
 		URL:      url,
 		Progress: os.Stdout,
 	}
 
 	if haveSSHURLParts(url) {
-		publicKeys, err := createPublicSSHKeysFromFile(s.input)
+		publicKeys, err := createPublicSSHKeysFromFile(s.input, stdin)
 		if err != nil {
 			return fmt.Errorf("failed process ssh url: %w", err)
 		}
@@ -47,7 +48,7 @@ func haveSSHURLParts(url string) bool {
 	return strings.Contains(url, "git@")
 }
 
-func createPublicSSHKeysFromFile(input input.Inputter) (*ssh.PublicKeys, error) {
+func createPublicSSHKeysFromFile(input input.Inputter, stdin io.Reader) (*ssh.PublicKeys, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get home directory: %w", err)
@@ -55,7 +56,7 @@ func createPublicSSHKeysFromFile(input input.Inputter) (*ssh.PublicKeys, error) 
 
 	fmt.Print("Enter path to your ssh file(.ssh/id_ed3122): ") //nolint
 
-	keyPath, err := input.GetInput(os.Stdin)
+	keyPath, err := input.GetInput(stdin)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user input: %w", err)
 	}

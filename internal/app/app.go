@@ -23,7 +23,7 @@ func Run(service service.Services) { //nolint
 
 	time.Sleep(commandTimeout)
 
-	url, err := service.ProcessUserURL()
+	url, err := service.ProcessUserURL(os.Stdin)
 	if err != nil {
 		colors.Red("Validation for URL failed! Please try again... ")
 		colors.Red(fmt.Sprintf("Error: %v\n", err))
@@ -34,7 +34,7 @@ func Run(service service.Services) { //nolint
 
 	time.Sleep(commandTimeout)
 
-	err = service.CloneAndValidateRepository(url)
+	err = service.CloneAndValidateRepository(url, os.Stdin)
 	if err != nil {
 		colors.Red("Failed to clone repository or repository didn't have base files for nvim configuration")
 		colors.Red(fmt.Sprintf("Error: %v\n", err))
@@ -56,7 +56,7 @@ func Run(service service.Services) { //nolint
 
 	time.Sleep(commandTimeout)
 
-	packageManger, err := service.ProcessPackageManagers()
+	packageManger, err := service.ProcessPackageManagers(os.Stdin)
 	if err != nil {
 		colors.Red("Failed to install package managers. Please try again...")
 		colors.Red(fmt.Sprintf("Error: %v\n", err))

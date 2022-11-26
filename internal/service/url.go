@@ -2,13 +2,13 @@ package service
 
 import (
 	"fmt"
-	"os"
+	"io"
 )
 
-func (s service) ProcessUserURL() (string, error) {
+func (s service) ProcessUserURL(stdin io.Reader) (string, error) {
 	fmt.Print("Enter URL to your nvim config: ") //nolint
 
-	configURL, err := s.input.GetInput(os.Stdin)
+	configURL, err := s.input.GetInput(stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed get user input: %w", err)
 	}

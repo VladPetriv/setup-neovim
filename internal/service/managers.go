@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 
@@ -12,17 +13,17 @@ import (
 
 var ErrEnterValidAnswer = errors.New("please enter valid answer")
 
-func (s service) ProcessPackageManagers() (models.PackageManager, error) {
+func (s service) ProcessPackageManagers(stdin io.Reader) (models.PackageManager, error) {
 	fmt.Print("Do you have any package managers installed?(y/n): ") //nolint
 
-	haveInstalledPackageManagers, err := s.input.GetInput(os.Stdin)
+	haveInstalledPackageManagers, err := s.input.GetInput(stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to get user input: %w", err)
 	}
 
 	switch haveInstalledPackageManagers {
 	case "n":
-		return installPackageManager(s.input)
+		return installPackageManager(s.input, stdin)
 	case "y":
 		return "", nil
 	default:
@@ -30,10 +31,10 @@ func (s service) ProcessPackageManagers() (models.PackageManager, error) {
 	}
 }
 
-func installPackageManager(input input.Inputter) (models.PackageManager, error) {
+func installPackageManager(input input.Inputter, stdin io.Reader) (models.PackageManager, error) {
 	fmt.Print("Choose package manager(packer/vim-plug): ") //nolint
 
-	packageManager, err := input.GetInput(os.Stdin)
+	packageManager, err := input.GetInput(stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to get user input: %w", err)
 	}
