@@ -8,15 +8,13 @@ type input struct{}
 
 var _ Inputter = (*input)(nil)
 
-func New() *input {
+func New() *input { //nolint
 	return &input{}
 }
 
-func (i input) GetInput(msg string) (string, error) {
+func (i input) GetInput() (string, error) {
 	var data string
-	fmt.Println(msg + ":")
-	_, err := fmt.Scanln(&data)
-	if err != nil {
+	if _, err := fmt.Scanln(&data); err != nil {
 		return "", fmt.Errorf("get input error: %w", err)
 	}
 
