@@ -2,16 +2,14 @@ package colors
 
 import "fmt"
 
-var (
-	red   = "\033[31m"
-	green = "\033[32m"
-	reset = "\033[0m"
-)
+var reset = "\033[0m" //nolint
 
 func Red(msg string) {
-	fmt.Println(string(red), msg, string(reset))
+	red := "\033[31m"
+	fmt.Printf("%s%s%s\n", string(red), msg, string(reset)) //nolint
 }
 
 func Green(msg string) {
-	fmt.Println(string(green), msg, string(reset))
+	green := "\033[32m"
+	fmt.Printf("%s%s%s\n", string(green), msg, string(reset)) //nolint
 }
