@@ -12,7 +12,7 @@ import (
 // commandTimeout represents timeout that should be after completing the previous function.
 var commandTimeout = 1 * time.Second //nolint
 
-func Run(service service.Services) {
+func Run(service service.Services) { //nolint
 	errs := service.CheckUtilStatus()
 	if len(errs) >= 1 {
 		colors.Red(fmt.Sprintf("Errors: %v\n", errs))
