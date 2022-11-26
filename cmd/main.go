@@ -11,7 +11,7 @@ func main() {
 	validator := validation.New()
 	inputter := input.New()
 
-	service := service.New(&service.ServiceOptions{
+	service := service.New(&service.Options{
 		Validator: validator,
 		Inputter:  inputter,
 	})
