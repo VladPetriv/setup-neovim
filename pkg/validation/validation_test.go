@@ -71,6 +71,7 @@ func Test_ValidateRepoFiles(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			err := testValidator.ValidateRepoFiles(tt.input)
 			assert.Equal(t, tt.expectedErr, err)
 		})

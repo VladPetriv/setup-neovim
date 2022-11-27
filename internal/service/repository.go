@@ -20,7 +20,7 @@ func (s service) CloneAndValidateRepository(url string, stdin io.Reader) error {
 	if haveSSHURLParts(url) {
 		publicKeys, err := createPublicSSHKeysFromFile(s.input, stdin)
 		if err != nil {
-			return fmt.Errorf("failed process ssh url: %w", err)
+			return fmt.Errorf("failed to process ssh url: %w", err)
 		}
 
 		cloneOptions.Auth = publicKeys

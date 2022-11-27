@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strings"
 )
 
 type input struct{}
@@ -16,9 +17,11 @@ func New() *input { //nolint
 
 func (i input) GetInput(stdin io.Reader) (string, error) {
 	reader := bufio.NewReader(stdin)
+
 	data, err := reader.ReadString('\n')
 	if err != nil {
 		return "", fmt.Errorf("get input error: %w", err)
 	}
-	return data, err
+
+	return strings.ReplaceAll(data, "\n", ""), nil
 }
