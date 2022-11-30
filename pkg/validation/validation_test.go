@@ -1,6 +1,7 @@
 package validation_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/VladPetriv/setup-neovim/pkg/validation"
@@ -59,6 +60,11 @@ func Test_ValidateRepoFiles(t *testing.T) {
 			name:        "repository contains valid files",
 			input:       "../../../../../.config/nvim/",
 			expectedErr: nil,
+		},
+		{
+			name:        "nvim is not a main directory",
+			input:       "../../../../../.config/",
+			expectedErr: fmt.Errorf("failed to get list of repository files: %w", validation.ErrNvimConfigDirIsNotMainDir),
 		},
 		{
 			name:        "repository didn't contains valid files",
