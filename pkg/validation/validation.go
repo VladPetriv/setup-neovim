@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	ErrURLContainsInvalidHost  = errors.New("url contains invalid host")
-	ErrNoBaseFilesInRepository = errors.New("repository didn't contains base files for nvim configuration")
+	ErrURLContainsInvalidHost    = errors.New("url contains invalid host")
+	ErrNoBaseFilesInRepository   = errors.New("repository didn't contains base files for nvim configuration")
+	ErrNvimConfigDirIsNotMainDir = errors.New("directory with nvim config is not the main directory")
 )
 
 type validation struct{}
@@ -67,17 +68,27 @@ func (v validation) ValidateRepoFiles(path string) error {
 
 func getRepositoryFiles(path string) (string, error) {
 	var files string
+	var filesCount int
 
 	err := filepath.Walk(path, func(_ string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("walk in repository error: %w", err)
 		}
 
+		if filesCount > 0 && info.Name() == "nvim" && info.IsDir() {
+			return ErrNvimConfigDirIsNotMainDir
+		}
+
 		files += fmt.Sprintf(" %s", info.Name())
+		filesCount++
 
 		return nil
 	})
 	if err != nil {
+		if errors.Is(err, ErrNvimConfigDirIsNotMainDir) {
+			return "", err
+		}
+
 		return "", fmt.Errorf("get list of files error: %w", err)
 	}
 
