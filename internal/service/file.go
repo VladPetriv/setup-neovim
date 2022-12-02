@@ -34,7 +34,7 @@ func (s service) ExtractConfigDirectory(repositoryPath string) (bool, error) {
 
 	configPath, err := getConfigPath(repositoryPath)
 	if err != nil {
-		return false, fmt.Errorf("failed to extract config directory: %w", err)
+		return false, fmt.Errorf("failed to config path: %w", err)
 	}
 
 	if configPath != "" {
