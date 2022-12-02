@@ -76,9 +76,11 @@ func Run(service service.Services) { //nolint
 		os.Exit(1)
 	}
 
-	colors.Green(fmt.Sprintf("%s successfully installed", packageManger))
+	if packageManger != "" {
+		colors.Green(fmt.Sprintf("%s successfully installed", packageManger))
 
-	time.Sleep(commandTimeout)
+		time.Sleep(commandTimeout)
+	}
 
 	err = service.CompleteSetup(packageManger)
 	if err != nil {
