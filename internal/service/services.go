@@ -19,4 +19,6 @@ type Services interface {
 	ProcessPackageManagers(stdin io.Reader) (models.PackageManager, error)
 	// CompleteSetup runs nvim with specific flag that depends on package manager
 	CompleteSetup(packageManager models.PackageManager) error
+	// ExtractConfigDirectory get config directory from other directory in repository
+	ExtractConfigDirectory(path string) (bool, error)
 }
