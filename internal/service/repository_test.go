@@ -54,12 +54,6 @@ func Test_CloneAndValidateRepository(t *testing.T) { //nolint
 			inputFilePath: "",
 			wantErr:       true,
 		},
-		{
-			name:          "CloneAndValidateRepository fail with error when nvim config directory is not main",
-			inputURL:      "https://github.com/craftzdog/dotfiles-public.git",
-			inputFilePath: "",
-			wantErr:       true,
-		},
 	}
 
 	for _, tt := range tests { //nolint
