@@ -1,14 +1,11 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 )
-
-var ErrExtractDir = errors.New("failed to")
 
 func (s service) MoveConfigDirectory() error {
 	homeDir, err := os.UserHomeDir()
