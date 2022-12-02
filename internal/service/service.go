@@ -33,6 +33,10 @@ func (s service) CheckUtilStatus() map[string]string {
 }
 
 func (s service) CompleteSetup(packageManager models.PackageManager) error {
+	if packageManager == "" {
+		return nil
+	}
+
 	var args string
 
 	if packageManager == models.Packer {
