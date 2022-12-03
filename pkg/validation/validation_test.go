@@ -44,36 +44,3 @@ func Test_ValidateURL(t *testing.T) {
 		})
 	}
 }
-
-func Test_ValidateRepoFiles(t *testing.T) {
-	t.Parallel()
-
-	testValidator := validation.New()
-
-	tests := []struct {
-		name        string
-		input       string
-		expectedErr error
-	}{
-		{
-			name:        "repository contains valid files",
-			input:       "../../../../../.config/nvim/",
-			expectedErr: nil,
-		},
-		{
-			name:        "repository didn't contains valid files",
-			input:       "../",
-			expectedErr: validation.ErrNoBaseFilesInRepository,
-		},
-	}
-
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			err := testValidator.ValidateRepoFiles(tt.input)
-			assert.Equal(t, tt.expectedErr, err)
-		})
-	}
-}
