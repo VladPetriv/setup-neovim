@@ -52,7 +52,9 @@ func Run(service service.Services) { //nolint
 		os.Exit(1)
 	}
 
-	colors.Green("Config successfully extracted!")
+	if isExtracted {
+		colors.Green("Config successfully extracted!")
+	}
 
 	time.Sleep(commandTimeout)
 
