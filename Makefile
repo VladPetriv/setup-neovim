@@ -4,7 +4,7 @@ run:
 
 .PHONY: build
 build:
-	go build -o setup ./cmd/main.go
+	go build -o setup-nvim ./cmd/main.go
 
 .PHONY: test
 test:
