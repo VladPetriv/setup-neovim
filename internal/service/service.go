@@ -1,10 +1,6 @@
 package service
 
 import (
-	"fmt"
-	"os/exec"
-
-	"github.com/VladPetriv/setup-neovim/internal/models"
 	"github.com/VladPetriv/setup-neovim/pkg/input"
 	"github.com/VladPetriv/setup-neovim/pkg/validation"
 )
@@ -30,27 +26,4 @@ func New(options *Options) *service { //nolint
 
 func (s service) CheckUtilStatus() map[string]string {
 	return s.validator.ValidateConsoleUtilities()
-}
-
-func (s service) CompleteSetup(packageManager models.PackageManager) error {
-	if packageManager == "" {
-		return nil
-	}
-
-	var args string
-
-	if packageManager == models.Packer {
-		args = "+PackerSync"
-	}
-
-	if packageManager == models.VimPlug {
-		args = "+PlugInstall"
-	}
-
-	cmd := exec.Command("nvim", args)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to complete setup: %w", err)
-	}
-
-	return nil
 }
