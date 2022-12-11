@@ -45,31 +45,15 @@ func Run(service service.Services) {
 
 	time.Sleep(commandTimeout)
 
-	isExtracted, err := service.ExtractConfigDirectory("./nvim")
+	err = service.ExtractAndMoveConfigDirectory("./nvim")
 	if err != nil {
-		colors.Red("Failed to extract config directory from repository")
+		colors.Red("Failed to extract and move config directory from repository")
 		colors.Red(fmt.Sprintf("Error: %v\n", err))
 		os.Exit(1)
 	}
-
-	if isExtracted {
-		colors.Green("Config successfully extracted!")
-	}
+	colors.Green("Config successfully extracted!")
 
 	time.Sleep(commandTimeout)
-
-	if !isExtracted {
-		err = service.MoveConfigDirectory()
-		if err != nil {
-			colors.Red("Failed to move repository to .config directory! Please try again... ")
-			colors.Red(fmt.Sprintf("Error: %v\n", err))
-			os.Exit(1)
-		}
-
-		colors.Green("Successfully moved repository to .config directory...")
-
-		time.Sleep(commandTimeout)
-	}
 
 	packageManger, err := service.ProcessPackageManagers(os.Stdin)
 	if err != nil {
