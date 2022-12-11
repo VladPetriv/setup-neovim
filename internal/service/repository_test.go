@@ -69,7 +69,6 @@ func Test_CloneAndValidateRepository(t *testing.T) { //nolint:tparallel // t.Par
 				assert.NoError(t, err)
 			}
 
-			// remove only when repository cloned and validated
 			err = os.RemoveAll("./nvim")
 			if err != nil {
 				t.Fatal(err)

@@ -78,7 +78,6 @@ func Test_ValidateRepoFiles(t *testing.T) { //nolint:tparallel // t.Parallel() c
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			// NOTE: here is no t.parallel() because it create conflicts with creating directories
 			err := os.Mkdir("nvim", 0o755)
 			if err != nil {
 				t.Fatal(err)
