@@ -11,7 +11,7 @@ type input struct{}
 
 var _ Inputter = (*input)(nil)
 
-func New() *input { //nolint
+func New() Inputter {
 	return &input{}
 }
 
