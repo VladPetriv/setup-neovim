@@ -6,7 +6,7 @@ import (
 )
 
 func (s service) ProcessUserURL(stdin io.Reader) (string, error) {
-	fmt.Print("Enter URL to your nvim config: ") //nolint:forbidigo // this print is used not for debugging
+	fmt.Print("Enter URL to your nvim config: ")
 
 	configURL, err := s.input.GetInput(stdin)
 	if err != nil {
