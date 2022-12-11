@@ -21,7 +21,7 @@ jobs:
       run: make build
 
     - name: Create directory for SSH keys
-    - run: mkdir ~/.ssh
+      run: mkdir ~/.ssh
 
     - name: Create secret SSH key
       run: touch ~/.ssh/id_ed25519
