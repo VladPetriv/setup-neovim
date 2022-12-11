@@ -12,7 +12,7 @@ import (
 )
 
 func (s service) CloneAndValidateRepository(url string, stdin io.Reader) error {
-	cloneOptions := &git.CloneOptions{ //nolint
+	cloneOptions := &git.CloneOptions{
 		URL:      url,
 		Progress: os.Stdout,
 	}
@@ -54,7 +54,7 @@ func createPublicSSHKeysFromFile(input input.Inputter, stdin io.Reader) (*ssh.Pu
 		return nil, fmt.Errorf("failed to get home directory: %w", err)
 	}
 
-	fmt.Print("Enter path to your ssh file(.ssh/id_ed3122): ") //nolint
+	fmt.Print("Enter path to your ssh file(.ssh/id_ed3122): ")
 
 	keyPath, err := input.GetInput(stdin)
 	if err != nil {

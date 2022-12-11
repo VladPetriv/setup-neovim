@@ -17,7 +17,7 @@ type Options struct {
 	Inputter  input.Inputter
 }
 
-func New(options *Options) *service { //nolint
+func New(options *Options) Services {
 	return &service{
 		validator: options.Validator,
 		input:     options.Inputter,

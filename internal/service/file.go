@@ -51,7 +51,7 @@ func (s service) ExtractConfigDirectory(repositoryPath string) (bool, error) {
 
 func getConfigPath(repositoryPath string) (string, error) {
 	var dirPath string
-	var filesCount int //nolint
+	var filesCount int
 
 	err := filepath.Walk(repositoryPath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {

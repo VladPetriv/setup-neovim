@@ -7,14 +7,13 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/VladPetriv/setup-neovim/internal/models"
 	"github.com/VladPetriv/setup-neovim/pkg/input"
 )
 
 var ErrEnterValidAnswer = errors.New("please enter valid answer")
 
-func (s service) ProcessPackageManagers(stdin io.Reader) (models.PackageManager, error) {
-	fmt.Print("Do you have any package managers installed?(y/n): ") //nolint
+func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
+	fmt.Print("Do you have any package managers installed?(y/n): ")
 
 	haveInstalledPackageManagers, err := s.input.GetInput(stdin)
 	if err != nil {
@@ -31,29 +30,29 @@ func (s service) ProcessPackageManagers(stdin io.Reader) (models.PackageManager,
 	}
 }
 
-func installPackageManager(input input.Inputter, stdin io.Reader) (models.PackageManager, error) {
-	fmt.Print("Choose package manager(packer/vim-plug): ") //nolint
+func installPackageManager(input input.Inputter, stdin io.Reader) (string, error) {
+	fmt.Print("Choose package manager(packer/vim-plug): ")
 
 	packageManager, err := input.GetInput(stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to get user input: %w", err)
 	}
 
-	switch models.PackageManager(packageManager) {
-	case models.Packer:
-		err := installPacker()
+	switch packageManager {
+	case "packer":
+		err = installPacker()
 		if err != nil {
 			return "", fmt.Errorf("install packer error: %w", err)
 		}
 
-		return models.Packer, nil
-	case models.VimPlug:
-		err := installVimPlug()
+		return "packer", nil
+	case "vim-plug":
+		err = installVimPlug()
 		if err != nil {
 			return "", fmt.Errorf("install vim-plug error: %w", err)
 		}
 
-		return models.VimPlug, nil
+		return "vim-plug", nil
 	default:
 		return "", ErrEnterValidAnswer
 	}
