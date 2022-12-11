@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -12,20 +13,24 @@ import (
 var (
 	ErrURLContainsInvalidHost  = errors.New("url contains invalid host")
 	ErrNoBaseFilesInRepository = errors.New("repository didn't contains base files for nvim configuration")
+	ErrDirectoryNotFound       = errors.New("directory not found")
 )
 
 type validation struct{}
 
 var _ Validator = (*validation)(nil)
 
-func New() *validation { //nolint
+func New() Validator {
 	return &validation{}
 }
 
 func (v validation) ValidateURL(url string) error {
+	// allowableErrorCount represents the number of allowed errors.
+	allowableErrorCount := 2
+
 	var errCount int
 
-	hosts := [2]string{"github.com", "gitlab.com"}
+	hosts := [3]string{"github.com", "gitlab.com", "bitbucket.org"}
 	for _, host := range hosts {
 		if strings.Contains(url, host) {
 			continue
@@ -34,7 +39,7 @@ func (v validation) ValidateURL(url string) error {
 		errCount++
 	}
 
-	if errCount > 1 {
+	if errCount > allowableErrorCount {
 		return ErrURLContainsInvalidHost
 	}
 
@@ -46,6 +51,10 @@ func (v validation) ValidateRepoFiles(path string) error {
 
 	files, err := getRepositoryFiles(path)
 	if err != nil {
+		if errors.Is(err, ErrDirectoryNotFound) {
+			return err
+		}
+
 		return fmt.Errorf("failed to get list of repository files: %w", err)
 	}
 
@@ -68,7 +77,12 @@ func (v validation) ValidateRepoFiles(path string) error {
 func getRepositoryFiles(path string) (string, error) {
 	var files string
 
-	err := filepath.Walk(path, func(_ string, info fs.FileInfo, err error) error {
+	_, err := os.Lstat(path)
+	if err != nil {
+		return "", ErrDirectoryNotFound
+	}
+
+	err = filepath.Walk(path, func(_ string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("walk in repository error: %w", err)
 		}
