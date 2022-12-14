@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"io"
 )
 
@@ -16,3 +17,8 @@ type Services interface {
 	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
 	ExtractAndMoveConfigDirectory(path string) error
 }
+
+var (
+	ErrDirectoryNotFound = errors.New("directory not found")
+	ErrEnterValidAnswer  = errors.New("please enter valid answer")
+)
