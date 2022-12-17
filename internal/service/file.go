@@ -1,21 +1,48 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 )
 
-func (s service) MoveConfigDirectory() error {
+func (s service) ExtractAndMoveConfigDirectory(repositoryPath string) error {
+	configPath, err := getConfigPath(repositoryPath)
+	if err != nil {
+		return fmt.Errorf("failed to config path: %w", err)
+	}
+
+	err = moveConfigDirectory(configPath)
+	if err != nil {
+		if errors.Is(err, ErrDirectoryNotFound) {
+			return err
+		}
+
+		return fmt.Errorf("failed to move config directory: %w", err)
+	}
+
+	return nil
+}
+
+func moveConfigDirectory(configPath string) error {
+	if configPath == "" {
+		if _, err := os.Lstat("./nvim"); err != nil {
+			return ErrDirectoryNotFound
+		}
+
+		configPath = "./nvim"
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("failed to get path to the home directory: %w", err)
 	}
 
-	err = os.Rename("./nvim", fmt.Sprintf("%s/.config/nvim", homeDir))
+	err = os.Rename(configPath, fmt.Sprintf("%s/.config/nvim", homeDir))
 	if err != nil {
-		removeErr := os.RemoveAll("./nvim")
+		removeErr := os.RemoveAll(configPath)
 		if removeErr != nil {
 			return fmt.Errorf("moving config failed, failed to remove repository: %w", err)
 		}
@@ -26,29 +53,7 @@ func (s service) MoveConfigDirectory() error {
 	return nil
 }
 
-func (s service) ExtractConfigDirectory(repositoryPath string) (bool, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return false, fmt.Errorf("failed to get path to the home directory: %w", err)
-	}
-
-	configPath, err := getConfigPath(repositoryPath)
-	if err != nil {
-		return false, fmt.Errorf("failed to config path: %w", err)
-	}
-
-	if configPath != "" {
-		err = os.Rename(configPath, fmt.Sprintf("%s/.config/nvim", homeDir))
-		if err != nil {
-			return false, fmt.Errorf("failed to move config directory: %w", err)
-		}
-
-		return true, nil
-	}
-
-	return false, nil
-}
-
+// getConfigPath is used for get path to nvim config if it's not main directory.
 func getConfigPath(repositoryPath string) (string, error) {
 	var dirPath string
 	var filesCount int
@@ -63,7 +68,6 @@ func getConfigPath(repositoryPath string) (string, error) {
 
 			return nil
 		}
-
 		filesCount++
 
 		return nil

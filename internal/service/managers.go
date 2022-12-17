@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,8 +8,6 @@ import (
 
 	"github.com/VladPetriv/setup-neovim/pkg/input"
 )
-
-var ErrEnterValidAnswer = errors.New("please enter valid answer")
 
 func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
 	fmt.Print("Do you have any package managers installed?(y/n): ")
