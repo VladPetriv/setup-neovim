@@ -5,41 +5,19 @@ import (
 	"io"
 	"os"
 	"os/exec"
-
-	"github.com/VladPetriv/setup-neovim/pkg/input"
 )
 
 func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
-	fmt.Print("Do you have any package managers installed?(y/n): ")
-
-	haveInstalledPackageManagers, err := s.input.GetInput(stdin)
+	packageManager, err := s.input.ProcessInputForPackageManagers(stdin)
 	if err != nil {
-		return "", fmt.Errorf("failed to get user input: %w", err)
-	}
-
-	switch haveInstalledPackageManagers {
-	case "n":
-		return installPackageManager(s.input, stdin)
-	case "y":
-		return "", nil
-	default:
-		return "", ErrEnterValidAnswer
-	}
-}
-
-func installPackageManager(input input.Inputter, stdin io.Reader) (string, error) {
-	fmt.Print("Choose package manager(packer/vim-plug): ")
-
-	packageManager, err := input.GetInput(stdin)
-	if err != nil {
-		return "", fmt.Errorf("failed to get user input: %w", err)
+		return "", fmt.Errorf("failed to process user input: %w", err)
 	}
 
 	switch packageManager {
 	case "packer":
 		err = installPacker()
 		if err != nil {
-			return "", fmt.Errorf("install packer error: %w", err)
+			return "", fmt.Errorf("install packaer error: %w", err)
 		}
 
 		return "packer", nil
@@ -48,8 +26,9 @@ func installPackageManager(input input.Inputter, stdin io.Reader) (string, error
 		if err != nil {
 			return "", fmt.Errorf("install vim-plug error: %w", err)
 		}
-
 		return "vim-plug", nil
+	case "skip":
+		return "", nil
 	default:
 		return "", ErrEnterValidAnswer
 	}
