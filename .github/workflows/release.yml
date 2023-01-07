@@ -1,7 +1,9 @@
+builds:
+- main: ./cmd/main.go
+
 brews:
   -
     name: setup-neovim
-
     tap:
       owner: VladPetriv
       name: setup-neovim
