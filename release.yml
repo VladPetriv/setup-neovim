@@ -1,8 +1,9 @@
-builds:
+brews:
+  builds:
   - 
     main: ./cmd/main.go
 
-brews:
+
   -
     name: setup-neovim
     tap:
@@ -11,8 +12,8 @@ brews:
       branch: main
       token: ${{ secrets.TOKEN }}
       commit_author:
-      name: VladPetriv
-      email: vladpetriv05@gmail.com
+        name: VladPetriv
+        email: vladpetriv05@gmail.com
 
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     folder: Formula
