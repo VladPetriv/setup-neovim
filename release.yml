@@ -1,11 +1,10 @@
 brews:
-
   -
     name: setup-neovim
     tap:
       owner: VladPetriv
       name: setup-neovim
-      branch: main
+      branch: feat/make-sv-installable-via-homebrew
       token: ${{ secrets.TOKEN }}
 
     commit_author:
