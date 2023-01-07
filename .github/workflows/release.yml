@@ -1,5 +1,4 @@
-builds:
-- main: ./cmd/main.go
+
 
 brews:
   -
@@ -9,7 +8,8 @@ brews:
       name: setup-neovim
       branch: main
       token: ${{ secrets.TOKEN }}
-
+    builds:
+      - main: ./cmd/main.go
     commit_author:
       name: VladPetriv
       email: vladpetriv05@gmail.com
