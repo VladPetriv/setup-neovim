@@ -1,7 +1,4 @@
 brews:
-  builds:
-    - main: ./cmd/main.go
-
 
   -
     name: setup-neovim
@@ -24,3 +21,6 @@ brews:
     license: "MIT"
 
     skip_upload: true
+
+    builds:
+      main: ./cmd/main.go
