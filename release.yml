@@ -1,7 +1,6 @@
 brews:
   builds:
-  - 
-    main: ./cmd/main.go
+    - main: ./cmd/main.go
 
 
   -
@@ -11,12 +10,17 @@ brews:
       name: setup-neovim
       branch: main
       token: ${{ secrets.TOKEN }}
-      commit_author:
+
+    commit_author:
         name: VladPetriv
         email: vladpetriv05@gmail.com
 
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+
     folder: Formula
+
     description: "Set up your nvim config in a few steps"
+
     license: "MIT"
+
     skip_upload: true
