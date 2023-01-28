@@ -33,10 +33,9 @@ func Test_CloneAndValidateRepository(t *testing.T) { //nolint:tparallel // t.Par
 		},
 		{
 			name:          "CloneAndValidateRepository success with https URL [gitlab]",
-			inputURL:      "https://gitlab.com/VladPetriv/nvim-config.git",
+			inputURL:      "https://gitlab.com/hantamkoding-dotfiles/neovim.git",
 			inputFilePath: "",
 		},
-
 		{
 			name:          "CloneAndValidateRepository success with SSH URL",
 			inputURL:      "git@github.com:VladPetriv/nvim-config.git",
