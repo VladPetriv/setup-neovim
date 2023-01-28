@@ -14,3 +14,11 @@ test:
 lint:
 	golangci-lint run ./...
 
+.PHONY: install
+install:
+	bash ./scripts/install.sh
+
+.PHONY: uninstall
+uninstall:
+	bash ./scripts/uninstall.sh
+
