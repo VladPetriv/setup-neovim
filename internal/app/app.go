@@ -7,15 +7,19 @@ import (
 
 	"github.com/VladPetriv/setup-neovim/internal/service"
 	"github.com/VladPetriv/setup-neovim/pkg/colors"
+	"github.com/VladPetriv/setup-neovim/pkg/errs"
 )
 
 func Run(service service.Services) {
 	// commandTimeout represents timeout that should be after completing the previous function.
 	commandTimeout := 1 * time.Second
 
-	errs := service.CheckUtilStatus()
-	if len(errs) >= 1 {
-		colors.Red(fmt.Sprintf("Errors: %v\n", errs))
+	errors := service.CheckUtilStatus()
+	if len(errors) >= 1 {
+		for _, value := range errors {
+			colors.Red(value)
+		}
+
 		os.Exit(1)
 	}
 
@@ -25,9 +29,7 @@ func Run(service service.Services) {
 
 	url, err := service.ProcessUserURL(os.Stdin)
 	if err != nil {
-		colors.Red("Validation for URL failed! Please try again... ")
-		colors.Red(fmt.Sprintf("Error: %v\n", err))
-		os.Exit(1)
+		errs.WrapError("Validation for URL failed! Please try again... ", err)
 	}
 
 	colors.Green("URL is valid...")
@@ -36,9 +38,7 @@ func Run(service service.Services) {
 
 	err = service.CloneAndValidateRepository(url, os.Stdin)
 	if err != nil {
-		colors.Red("Failed to clone repository or repository didn't have base files for nvim configuration")
-		colors.Red(fmt.Sprintf("Error: %v\n", err))
-		os.Exit(1)
+		errs.WrapError("Failed to clone repository or repository didn't have base files for nvim configuration", err)
 	}
 
 	colors.Green("Repository successfully cloned and checked for base files")
@@ -47,9 +47,7 @@ func Run(service service.Services) {
 
 	err = service.ExtractAndMoveConfigDirectory("./nvim")
 	if err != nil {
-		colors.Red("Failed to extract and move config directory from repository")
-		colors.Red(fmt.Sprintf("Error: %v\n", err))
-		os.Exit(1)
+		errs.WrapError("Failed to extract and move config directory from repository", err)
 	}
 	colors.Green("Config successfully extracted!")
 
@@ -57,9 +55,7 @@ func Run(service service.Services) {
 
 	packageManger, err := service.ProcessPackageManagers(os.Stdin)
 	if err != nil {
-		colors.Red("Failed to install package manager. Please try again...")
-		colors.Red(fmt.Sprintf("Error: %v\n", err))
-		os.Exit(1)
+		errs.WrapError("Failed to install package manager. Please try again...", err)
 	}
 
 	if packageManger != "" {
