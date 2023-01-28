@@ -1,6 +1,9 @@
 # setup-nvim
 
 setup-nvim is a simple cli utility for setup your neovim by configs from open source repositories.
+[How it works](https://user-images.githubusercontent.com/80276277/215291221-6e588f9e-de61-49c2-bd4f-050ba295ac57.webm)
+
+
 
 ## Features 🤔
 
@@ -32,3 +35,5 @@ Run the uninstalling command via `make`:
 ```bash
   make uninstall
 ```
+
+
