@@ -14,19 +14,19 @@ func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
 	}
 
 	switch packageManager {
-	case "packer":
+	case PackerPluginManager:
 		err = installPacker()
 		if err != nil {
-			return "", fmt.Errorf("install packaer error: %w", err)
+			return "", fmt.Errorf("install packer error: %w", err)
 		}
 
-		return "packer", nil
-	case "vim-plug":
+		return PackerPluginManager, nil
+	case VimPlugPluginManager:
 		err = installVimPlug()
 		if err != nil {
 			return "", fmt.Errorf("install vim-plug error: %w", err)
 		}
-		return "vim-plug", nil
+		return VimPlugPluginManager, nil
 	case "skip":
 		return "", nil
 	default:

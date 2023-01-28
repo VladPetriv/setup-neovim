@@ -57,7 +57,7 @@ func Run(service service.Services) {
 
 	packageManger, err := service.ProcessPackageManagers(os.Stdin)
 	if err != nil {
-		colors.Red("Failed to install package managers. Please try again...")
+		colors.Red("Failed to install package manager. Please try again...")
 		colors.Red(fmt.Sprintf("Error: %v\n", err))
 		os.Exit(1)
 	}

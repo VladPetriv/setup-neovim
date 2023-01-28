@@ -22,3 +22,8 @@ var (
 	ErrDirectoryNotFound = errors.New("directory not found")
 	ErrEnterValidAnswer  = errors.New("please enter valid answer")
 )
+
+const (
+	PackerPluginManager  = "packer"
+	VimPlugPluginManager = "vim-plug"
+)

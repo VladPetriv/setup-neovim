@@ -2,7 +2,7 @@ package colors
 
 import "fmt"
 
-var reset = "\033[0m" //nolint:gochecknoglobals // reset should be global variable to avoid code duplication.
+const reset = "\033[0m"
 
 func Red(msg string) {
 	red := "\033[31m"
