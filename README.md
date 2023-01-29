@@ -1,7 +1,8 @@
 # setup-nvim
 
 setup-nvim is a simple cli utility for setup your neovim by configs from open source repositories.
-[How it works](https://user-images.githubusercontent.com/80276277/215291221-6e588f9e-de61-49c2-bd4f-050ba295ac57.webm)
+
+[Video example of how it works](https://user-images.githubusercontent.com/80276277/215291221-6e588f9e-de61-49c2-bd4f-050ba295ac57.webm)
 
 
 
@@ -15,23 +16,39 @@ setup-nvim is a simple cli utility for setup your neovim by configs from open so
 - Colored input and output
 
 ## How to install ✅?
+
 1. Clone the repository:
 
 ```bash
   git clone git@github.com:VladPetriv/setup-neovim.git
 ```
-2. Run the installation command via `make`:
+
+2. Go to repository directory:
+
+```bash
+  cd setup-neovim
+```
+
+3. Run the installation command via `make`:
 
 ```bash
   make install
 ```
-3. Start using:
+4. Start using:
 ```bash
   setup-nvim
 ```
 
 ## How to uninstall ❌?
-Run the uninstalling command via `make`:
+
+1. Go to repository directory:
+
+```bash
+  cd setup-neovim
+```
+
+2. Run the uninstalling command via `make`:
+
 ```bash
   make uninstall
 ```
