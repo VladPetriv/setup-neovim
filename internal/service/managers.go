@@ -18,14 +18,14 @@ func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
 	case PackerPluginManager:
 		err = installPacker()
 		if err != nil {
-			return "", fmt.Errorf("install packer error: %w", err)
+			return "", fmt.Errorf("install packer: %w", err)
 		}
 
 		return PackerPluginManager, nil
 	case VimPlugPluginManager:
 		err = installVimPlug()
 		if err != nil {
-			return "", fmt.Errorf("install vim-plug error: %w", err)
+			return "", fmt.Errorf("install vim-plug: %w", err)
 		}
 
 		return VimPlugPluginManager, nil
@@ -42,7 +42,7 @@ func (s service) GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 	reader := bufio.NewReader(stdin)
 	haveInstalledPackageManagers, err := s.input.GetInput(reader)
 	if err != nil {
-		return "", fmt.Errorf("failed to get user input: %w", err)
+		return "", fmt.Errorf("get input for is user has installed pkg manager: %w", err)
 	}
 
 	switch haveInstalledPackageManagers {
@@ -60,7 +60,7 @@ func (s service) GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 func installVimPlug() error {
 	file, err := os.Create("vim-plug.sh")
 	if err != nil {
-		return fmt.Errorf("create sh file for install script error: %w", err)
+		return fmt.Errorf("create file for installing script: %w", err)
 	}
 
 	_, err = file.Write([]byte(
@@ -71,17 +71,17 @@ func installVimPlug() error {
     `,
 	))
 	if err != nil {
-		return fmt.Errorf("write to sh file error: %w", err)
+		return fmt.Errorf("write data to installing script file: %w", err)
 	}
 
 	cmd := exec.Command("/bin/sh", "vim-plug.sh")
 	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("run sh file error: %w", err)
+		return fmt.Errorf("execute script for vim plug installation: %w", err)
 	}
 
 	err = os.Remove("./vim-plug.sh")
 	if err != nil {
-		return fmt.Errorf("remove sh file error: %w", err)
+		return fmt.Errorf("remove installation script file: %w", err)
 	}
 
 	return nil
@@ -90,7 +90,7 @@ func installVimPlug() error {
 func installPacker() error {
 	file, err := os.Create("packer.sh")
 	if err != nil {
-		return fmt.Errorf("create file for install script error: %w", err)
+		return fmt.Errorf("create file for installing script: %w", err)
 	}
 
 	_, err = file.Write([]byte(
@@ -101,17 +101,17 @@ func installPacker() error {
     `,
 	))
 	if err != nil {
-		return fmt.Errorf("write to sh file error: %w", err)
+		return fmt.Errorf("write data to installing script file: %w", err)
 	}
 
 	cmd := exec.Command("/bin/sh", "packer.sh")
 	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("run sh file error: %w", err)
+		return fmt.Errorf("execute script for vim plug installation: %w", err)
 	}
 
 	err = os.Remove("./packer.sh")
 	if err != nil {
-		return fmt.Errorf("remove sh file error: %w", err)
+		return fmt.Errorf("remove installation script file: %w", err)
 	}
 
 	return nil
