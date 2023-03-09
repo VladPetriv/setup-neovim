@@ -40,7 +40,7 @@ func Test_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel // t.
 	}{
 		{
 			name:    "failed by directory not found",
-			input:   "./test_not_found",
+			input:   "./not_found",
 			wantErr: true,
 		},
 		{
