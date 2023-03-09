@@ -14,6 +14,8 @@ type Services interface {
 	CloneAndValidateRepository(url string, stdin io.Reader) error
 	// ProcessPackageManagers ask user about package managers and install them if needed
 	ProcessPackageManagers(stdin io.Reader) (string, error)
+	// GetPackageMangerIfNotInstalled asks user if it has installed package manager and return name if it not installed
+	GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
 	ExtractAndMoveConfigDirectory(path string) error
 }

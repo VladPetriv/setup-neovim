@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -8,7 +9,7 @@ import (
 )
 
 func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
-	packageManager, err := s.input.ProcessInputForPackageManagers(stdin)
+	packageManager, err := s.GetPackageMangerIfNotInstalled(stdin)
 	if err != nil {
 		return "", fmt.Errorf("failed to process user input: %w", err)
 	}
@@ -26,11 +27,33 @@ func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("install vim-plug error: %w", err)
 		}
+
 		return VimPlugPluginManager, nil
 	case "skip":
 		return "", nil
 	default:
 		return "", ErrEnterValidAnswer
+	}
+}
+
+func (s service) GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error) {
+	fmt.Print("Do you have any package managers installed?(y/n): ")
+
+	reader := bufio.NewReader(stdin)
+	haveInstalledPackageManagers, err := s.input.GetInput(reader)
+	if err != nil {
+		return "", fmt.Errorf("failed to get user input: %w", err)
+	}
+
+	switch haveInstalledPackageManagers {
+	case "y":
+		return "skip", nil
+	case "n":
+		fmt.Print("Choose package manager(packer/vim-plug): ")
+
+		return s.input.GetInput(reader)
+	default:
+		return "", nil
 	}
 }
 

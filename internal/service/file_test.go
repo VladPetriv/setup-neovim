@@ -20,23 +20,16 @@ func Test_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel // t.
 		Validator: validation.New(),
 	})
 
-	directories := map[string]string{
-		"main":      "./nvim",
-		"not_main":  "./test_not_main/nvim",
-		"not_found": "./test_not_found/",
-	}
-
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	tests := []struct {
-		name                     string
-		input                    string
-		wantErr                  bool
-		shouldCreateAsMainDir    bool
-		shouldCreateAsNotMainDir bool
+		name          string
+		input         string
+		wantErr       bool
+		directoryType string
 	}{
 		{
 			name:    "failed by directory not found",
@@ -44,33 +37,21 @@ func Test_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel // t.
 			wantErr: true,
 		},
 		{
-			name:                  "successful by moving config as main directory",
-			input:                 "./nvim",
-			shouldCreateAsMainDir: true,
+			name:          "successful by moving config as main directory",
+			input:         "./nvim",
+			directoryType: "main",
 		},
 		{
-			name:                     "successful by moving config as extracted directory",
-			input:                    "./test_not_main",
-			shouldCreateAsNotMainDir: true,
+			name:          "successful by moving config as extracted directory",
+			input:         "./test_not_main",
+			directoryType: "not_main",
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			var directory string
-			switch {
-			case tt.shouldCreateAsMainDir:
-				directory = directories["main"]
-			case tt.shouldCreateAsNotMainDir:
-				directory = directories["not_main"]
-			default:
-				directory = directories["not_found"]
-			}
-
-			err = os.MkdirAll(directory, 0755)
-			if err != nil {
-				require.NoError(t, err)
-			}
+			err = createDirectoryByType(tt.directoryType)
+			require.NoError(t, err)
 
 			got := testService.ExtractAndMoveConfigDirectory(tt.input)
 			if tt.wantErr {
@@ -85,4 +66,29 @@ func Test_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel // t.
 			}
 		})
 	}
+}
+
+func createDirectoryByType(directoryType string) error {
+	directories := map[string]string{
+		"main":     "./nvim",
+		"not_main": "./test_not_main/nvim",
+	}
+
+	var directory string
+
+	switch directoryType {
+	case "main":
+		directory = directories["main"]
+	case "not_main":
+		directory = directories["not_main"]
+	default:
+		return nil
+	}
+
+	err := os.MkdirAll(directory, 0755)
+	if err != nil {
+		return fmt.Errorf("create directory: %w", err)
+	}
+
+	return nil
 }
