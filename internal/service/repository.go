@@ -51,21 +51,21 @@ func haveSSHURLParts(url string) bool {
 func createPublicSSHKeysFromFile(input input.Inputter, stdin io.Reader) (*ssh.PublicKeys, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get home directory: %w", err)
+		return nil, fmt.Errorf("get home directory: %w", err)
 	}
 
 	fmt.Print("Enter path to your ssh file(.ssh/id_ed3122): ")
 
 	keyPath, err := input.GetInput(stdin)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user input: %w", err)
+		return nil, fmt.Errorf("get input for ssh key path: %w", err)
 	}
 
 	filePath := fmt.Sprintf("%s/%s", homeDir, keyPath)
 
 	publicKeys, err := ssh.NewPublicKeysFromFile("git", filePath, "")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create ssh public keys from file: %w", err)
+		return nil, fmt.Errorf("create ssh public from file: %w", err)
 	}
 
 	return publicKeys, nil

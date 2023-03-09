@@ -10,12 +10,12 @@ func (s service) ProcessUserURL(stdin io.Reader) (string, error) {
 
 	configURL, err := s.input.GetInput(stdin)
 	if err != nil {
-		return "", fmt.Errorf("failed get user input: %w", err)
+		return "", fmt.Errorf("get input for config url: %w", err)
 	}
 
 	err = s.validator.ValidateURL(configURL)
 	if err != nil {
-		return "", fmt.Errorf("URL validation failed: %w", err)
+		return "", err
 	}
 
 	return configURL, nil

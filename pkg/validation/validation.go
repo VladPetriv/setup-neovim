@@ -55,7 +55,7 @@ func (v validation) ValidateRepoFiles(path string) error {
 			return err
 		}
 
-		return fmt.Errorf("failed to get list of repository files: %w", err)
+		return fmt.Errorf("get list of repository files: %w", err)
 	}
 
 	baseFiles := [2]string{"init.lua", "init.vim"}
@@ -84,7 +84,7 @@ func getRepositoryFiles(path string) (string, error) {
 
 	err = filepath.Walk(path, func(_ string, info fs.FileInfo, err error) error {
 		if err != nil {
-			return fmt.Errorf("walk in repository error: %w", err)
+			return fmt.Errorf("walk through files in directory: %w", err)
 		}
 
 		files += fmt.Sprintf(" %s", info.Name())
@@ -92,7 +92,7 @@ func getRepositoryFiles(path string) (string, error) {
 		return nil
 	})
 	if err != nil {
-		return "", fmt.Errorf("get list of files error: %w", err)
+		return "", fmt.Errorf("get list of repository files: %w", err)
 	}
 
 	return files, nil

@@ -41,7 +41,7 @@ func Test_ProcesUserURL(t *testing.T) {
 			name:        "ProcessUserURL fail with invalid host",
 			input:       "test",
 			expectedURL: "",
-			expectedErr: fmt.Errorf("URL validation failed: %w", validation.ErrURLContainsInvalidHost),
+			expectedErr: validation.ErrURLContainsInvalidHost,
 		},
 	}
 
