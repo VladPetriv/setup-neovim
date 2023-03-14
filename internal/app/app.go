@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -10,13 +11,13 @@ import (
 	"github.com/VladPetriv/setup-neovim/pkg/errs"
 )
 
-func Run(service service.Services) {
+func Run(srv service.Services) {
 	// commandTimeout represents timeout that should be after completing the previous function.
 	commandTimeout := 1 * time.Second
 
-	errors := service.CheckUtilStatus()
-	if len(errors) >= 1 {
-		for _, value := range errors {
+	utilErrors := srv.CheckUtilStatus()
+	if len(utilErrors) >= 1 {
+		for _, value := range utilErrors {
 			colors.Red(value)
 		}
 
@@ -27,7 +28,24 @@ func Run(service service.Services) {
 
 	time.Sleep(commandTimeout)
 
-	url, err := service.ProcessUserURL(os.Stdin)
+	err := srv.DeleteConfigOrStopInstallation(os.Stdin)
+	if err != nil {
+		if errors.Is(err, service.ErrStopInstallation) {
+			errs.WrapError("Thank you for using setup-nvim!", err)
+		}
+
+		if errors.Is(err, service.ErrEnterValidAnswer) {
+			errs.WrapError("Please choose correct answer for question!", err)
+		}
+
+		errs.WrapError("Failed to delete config or stop installation!", err)
+	}
+
+	colors.Green("Successfully remove old nvim config...")
+
+	time.Sleep(commandTimeout)
+
+	url, err := srv.ProcessUserURL(os.Stdin)
 	if err != nil {
 		errs.WrapError("Validation for URL failed! Please try again... ", err)
 	}
@@ -36,7 +54,7 @@ func Run(service service.Services) {
 
 	time.Sleep(commandTimeout)
 
-	err = service.CloneAndValidateRepository(url, os.Stdin)
+	err = srv.CloneAndValidateRepository(url, os.Stdin)
 	if err != nil {
 		errs.WrapError("Failed to clone repository or repository didn't have base files for nvim configuration", err)
 	}
@@ -45,7 +63,7 @@ func Run(service service.Services) {
 
 	time.Sleep(commandTimeout)
 
-	err = service.ExtractAndMoveConfigDirectory("./nvim")
+	err = srv.ExtractAndMoveConfigDirectory("./nvim")
 	if err != nil {
 		errs.WrapError("Failed to extract and move config directory from repository", err)
 	}
@@ -53,7 +71,7 @@ func Run(service service.Services) {
 
 	time.Sleep(commandTimeout)
 
-	packageManger, err := service.ProcessPackageManagers(os.Stdin)
+	packageManger, err := srv.ProcessPackageManagers(os.Stdin)
 	if err != nil {
 		errs.WrapError("Failed to install package manager. Please try again...", err)
 	}
