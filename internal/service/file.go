@@ -74,7 +74,7 @@ func getConfigPath(repositoryPath string) (string, error) {
 		return nil
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to get path to nvim config in repository: %w", err)
+		return "", fmt.Errorf("get path to config inside repository: %w", err)
 	}
 
 	return dirPath, nil
