@@ -18,11 +18,15 @@ type Services interface {
 	GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
 	ExtractAndMoveConfigDirectory(path string) error
+	// DeleteConfigOrStopInstallation
+	DeleteConfigOrStopInstallation(stdin io.Reader) error
 }
 
 var (
-	ErrDirectoryNotFound = errors.New("directory not found")
-	ErrEnterValidAnswer  = errors.New("please enter valid answer")
+	ErrDirectoryNotFound     = errors.New("directory not found")
+	ErrEnterValidAnswer      = errors.New("please enter valid answer")
+	ErrDirectoryAlreadyExist = errors.New("config directory already exists")
+	ErrStopInstallation      = errors.New("stop config installation")
 )
 
 const (
