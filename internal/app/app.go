@@ -11,10 +11,10 @@ import (
 	"github.com/VladPetriv/setup-neovim/pkg/errs"
 )
 
-func Run(srv service.Services) {
-	// commandTimeout represents timeout that should be after completing the previous function.
-	commandTimeout := 1 * time.Second
+// commandTimeout represents timeout that should be after completing the previous function.
+const commandTimeout = 1 * time.Second
 
+func Run(srv service.Services) {
 	utilErrors := srv.CheckUtilStatus()
 	if len(utilErrors) >= 1 {
 		for _, value := range utilErrors {
@@ -24,9 +24,7 @@ func Run(srv service.Services) {
 		os.Exit(1)
 	}
 
-	colors.Green("All utilities are installed....")
-
-	time.Sleep(commandTimeout)
+	successfulCommand("All utilities are installed....")
 
 	err := srv.DeleteConfigOrStopInstallation(os.Stdin)
 	if err != nil {
@@ -41,35 +39,28 @@ func Run(srv service.Services) {
 		errs.WrapError("Failed to delete config or stop installation!", err)
 	}
 
-	colors.Green("Successfully remove old nvim config...")
-
-	time.Sleep(commandTimeout)
+	successfulCommand("Successfully remove old nvim config...")
 
 	url, err := srv.ProcessUserURL(os.Stdin)
 	if err != nil {
 		errs.WrapError("Validation for URL failed! Please try again... ", err)
 	}
 
-	colors.Green("URL is valid...")
-
-	time.Sleep(commandTimeout)
+	successfulCommand("URL is valid...")
 
 	err = srv.CloneAndValidateRepository(url, os.Stdin)
 	if err != nil {
 		errs.WrapError("Failed to clone repository or repository didn't have base files for nvim configuration", err)
 	}
 
-	colors.Green("Repository successfully cloned and checked for base files")
-
-	time.Sleep(commandTimeout)
+	successfulCommand("Repository successfully cloned and checked for base files")
 
 	err = srv.ExtractAndMoveConfigDirectory("./nvim")
 	if err != nil {
 		errs.WrapError("Failed to extract and move config directory from repository", err)
 	}
-	colors.Green("Config successfully extracted!")
 
-	time.Sleep(commandTimeout)
+	successfulCommand("Config successfully extracted!")
 
 	packageManger, err := srv.ProcessPackageManagers(os.Stdin)
 	if err != nil {
@@ -77,10 +68,15 @@ func Run(srv service.Services) {
 	}
 
 	if packageManger != "" {
-		colors.Green(fmt.Sprintf("%s successfully installed", packageManger))
-
-		time.Sleep(commandTimeout)
+		successfulCommand(fmt.Sprintf("%s successfully installed", packageManger))
 	}
 
 	colors.Green("Nvim successfully configured!")
+}
+
+// successfulCommand print message with green color and wait command timeout [3s].
+func successfulCommand(text string) {
+	colors.Green(text)
+
+	time.Sleep(commandTimeout)
 }
