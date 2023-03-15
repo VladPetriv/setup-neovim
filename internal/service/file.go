@@ -82,50 +82,55 @@ func getConfigPath(repositoryPath string) (string, error) {
 }
 
 func (s service) DeleteConfigOrStopInstallation(stdin io.Reader) error {
-	err := s.checkIfConfigDirectoryIsExist()
-	if err != nil {
-		if !errors.Is(err, ErrDirectoryAlreadyExist) {
-			return nil
-		}
-
-		fmt.Printf("Already installed neovim config detected...\nDo you want to remove it for continue installation?(y/n):")
-		shouldStopOrContinueInstallation, err := s.input.GetInput(stdin)
-		if err != nil {
-			return fmt.Errorf("get user input for is user want to continue installation or not: %w", err)
-		}
-
-		switch shouldStopOrContinueInstallation {
-		case "y":
-			homeDir, err := os.UserHomeDir()
-			if err != nil {
-				return fmt.Errorf("get home directory: %w", err)
-			}
-
-			if err = os.RemoveAll(fmt.Sprintf("%s/.config/nvim", homeDir)); err != nil {
-				return fmt.Errorf("remove existed config directory: %w", err)
-			}
-
-			return nil
-		case "n":
-			return ErrStopInstallation
-		default:
-			return ErrEnterValidAnswer
-		}
+	exist, err := s.checkIfConfigDirectoryIsExist()
+	if err != nil && !errors.Is(err, ErrDirectoryNotFound) {
+		return fmt.Errorf("check if config directory already exist: %w", err)
 	}
 
-	return nil
+	// directory not found we should continue installation
+	if !exist {
+		return nil
+	}
+
+	fmt.Printf("Already installed neovim config detected...\nDo you want to remove it for continue installation?(y/n):")
+	shouldStopOrContinueInstallation, err := s.input.GetInput(stdin)
+	if err != nil {
+		return fmt.Errorf("get user input for is user want to continue installation or not: %w", err)
+	}
+
+	switch shouldStopOrContinueInstallation {
+	case "y":
+		return s.deleteConfig()
+	case "n":
+		return ErrStopInstallation
+	default:
+		return ErrEnterValidAnswer
+	}
 }
 
 // checkIfConfigDirectoryIsExist checks if config directory existed by default path.
-func (s service) checkIfConfigDirectoryIsExist() error {
+func (s service) checkIfConfigDirectoryIsExist() (bool, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return false, fmt.Errorf("get home directory: %w", err)
+	}
+
+	if _, err = os.Lstat(fmt.Sprintf("%s/.config/nvim", homeDir)); err != nil {
+		return false, ErrDirectoryNotFound
+	}
+
+	return true, nil
+}
+
+func (s service) deleteConfig() error {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("get home directory: %w", err)
 	}
 
-	if _, err = os.Lstat(fmt.Sprintf("%s/.config/nvim", homeDir)); err != nil {
-		return ErrDirectoryNotFound
+	if err = os.RemoveAll(fmt.Sprintf("%s/.config/nvim", homeDir)); err != nil {
+		return fmt.Errorf("remove existed config directory: %w", err)
 	}
 
-	return ErrDirectoryAlreadyExist
+	return nil
 }
