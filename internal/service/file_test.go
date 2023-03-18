@@ -3,6 +3,7 @@ package service_test
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/VladPetriv/setup-neovim/internal/service"
@@ -91,4 +92,70 @@ func createDirectoryByType(directoryType string) error {
 	}
 
 	return nil
+}
+
+func Test_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
+	t.Parallel()
+
+	testService := service.New(&service.Options{
+		Inputter:  input.New(),
+		Validator: validation.New(),
+	})
+
+	homeDir, err := os.UserHomeDir()
+	require.NoError(t, err)
+
+	configPath := fmt.Sprintf("%s/.config/nvim", homeDir)
+
+	tests := []struct {
+		name                        string
+		input                       string
+		shouldCreateConfigDirectory bool
+		want                        error
+	}{
+		{
+			name:                        "DeleteConfigOrStopInstallation successful",
+			input:                       "y",
+			want:                        nil,
+			shouldCreateConfigDirectory: true,
+		},
+		{
+			name:  "DeleteConfigOrStopInstallation successful with no needs to deleting config",
+			input: "",
+			want:  nil,
+		},
+		{
+			name:                        "DeleteConfigOrStopInstallation failed with stop installation",
+			input:                       "n",
+			want:                        service.ErrStopInstallation,
+			shouldCreateConfigDirectory: true,
+		},
+		{
+			name:                        "DeleteConfigOrStopInstallation failed with invalid answer",
+			input:                       "hello",
+			want:                        service.ErrEnterValidAnswer,
+			shouldCreateConfigDirectory: true,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			input := strings.NewReader(
+				fmt.Sprintf("%s\n", tt.input),
+			)
+
+			if tt.shouldCreateConfigDirectory {
+				err = os.MkdirAll(configPath, 0755)
+				require.NoError(t, err)
+			}
+
+			err = testService.DeleteConfigOrStopInstallation(input)
+			assert.Equal(t, tt.want, err)
+
+			if tt.shouldCreateConfigDirectory {
+				err = os.RemoveAll(configPath)
+				require.NoError(t, err)
+			}
+		})
+	}
 }
