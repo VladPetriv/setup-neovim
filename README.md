@@ -16,6 +16,7 @@ Video example of how it works:
 - Validation for URL
 - Validation for repository files
 - Colored input and output
+- Check if confit already exists and ask permission for deleting it
 
 ## How to install ✅?
 
