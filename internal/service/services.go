@@ -18,7 +18,7 @@ type Services interface {
 	GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
 	ExtractAndMoveConfigDirectory(path string) error
-	// DeleteConfigOrStopInstallation
+	// DeleteConfigOrStopInstallation checks if nvim config is exist and ask permission for deleting it.
 	DeleteConfigOrStopInstallation(stdin io.Reader) error
 }
 
