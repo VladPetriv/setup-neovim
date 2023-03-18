@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_ProcesUserURL(t *testing.T) {
+func Test_ProcessUserURL(t *testing.T) {
 	t.Parallel()
 
 	testService := service.New(&service.Options{
