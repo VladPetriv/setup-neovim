@@ -17,7 +17,7 @@ func (s service) CloneAndValidateRepository(url string, stdin io.Reader) error {
 		Progress: os.Stdout,
 	}
 
-	if haveSSHURLParts(url) {
+	if hasSSHURLParts(url) {
 		publicKeys, err := createPublicSSHKeysFromFile(s.input, stdin)
 		if err != nil {
 			return fmt.Errorf("failed to process ssh url: %w", err)
@@ -44,7 +44,7 @@ func (s service) CloneAndValidateRepository(url string, stdin io.Reader) error {
 	return nil
 }
 
-func haveSSHURLParts(url string) bool {
+func hasSSHURLParts(url string) bool {
 	return strings.Contains(url, "git@")
 }
 
