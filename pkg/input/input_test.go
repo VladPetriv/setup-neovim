@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_GetInput(t *testing.T) {
+func TestInputter_GetInput(t *testing.T) {
 	t.Parallel()
 
 	testInput := input.New()

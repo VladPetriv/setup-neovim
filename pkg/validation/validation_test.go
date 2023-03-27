@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_ValidateURL(t *testing.T) {
+func TestValidator_ValidateURL(t *testing.T) {
 	t.Parallel()
 
 	testValidator := validation.New()
@@ -46,7 +46,7 @@ func Test_ValidateURL(t *testing.T) {
 	}
 }
 
-func Test_ValidateRepoFiles(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with directories
+func TestValidator_ValidateRepoFiles(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with directories
 	t.Parallel()
 
 	testValidator := validation.New()

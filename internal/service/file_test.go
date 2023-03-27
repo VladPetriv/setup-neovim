@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
+func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
 	t.Parallel()
 
 	testService := service.New(&service.Options{
@@ -94,7 +94,7 @@ func createDirectoryByType(directoryType string) error {
 	return nil
 }
 
-func Test_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
+func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
 	t.Parallel()
 
 	testService := service.New(&service.Options{

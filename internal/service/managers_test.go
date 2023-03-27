@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_ProcessPackageManagers(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with files
+func TestManager_ProcessPackageManagers(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with files
 	t.Parallel()
 
 	testService := service.New(&service.Options{
@@ -89,7 +89,7 @@ func Test_ProcessPackageManagers(t *testing.T) { //nolint:tparallel // t.Paralle
 	}
 }
 
-func Test_ProcessInputForPackageManagers(t *testing.T) {
+func TestManager_ProcessInputForPackageManagers(t *testing.T) {
 	t.Parallel()
 
 	testService := service.New(&service.Options{

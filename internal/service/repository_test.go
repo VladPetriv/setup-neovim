@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_CloneAndValidateRepository(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with go-git
+func TestRepository_CloneAndValidateRepository(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with go-git
 	t.Parallel()
 
 	testService := service.New(&service.Options{
