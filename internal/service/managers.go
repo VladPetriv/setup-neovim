@@ -106,7 +106,7 @@ func installPacker() error {
 
 	cmd := exec.Command("/bin/sh", "packer.sh")
 	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("execute script for vim plug installation: %w", err)
+		return fmt.Errorf("execute script for packer installation: %w", err)
 	}
 
 	err = os.Remove("./packer.sh")
