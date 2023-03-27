@@ -149,8 +149,8 @@ func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,
 				require.NoError(t, err)
 			}
 
-			err = testService.DeleteConfigOrStopInstallation(input)
-			assert.Equal(t, tt.want, err)
+			got := testService.DeleteConfigOrStopInstallation(input)
+			assert.Equal(t, tt.want, got)
 
 			if tt.shouldCreateConfigDirectory {
 				err = os.RemoveAll(configPath)
