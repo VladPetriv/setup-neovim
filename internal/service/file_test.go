@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
+func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with dirs
 	t.Parallel()
 
 	testService := service.New(&service.Options{
