@@ -15,7 +15,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19
+        go-version: 1.20
 
     - name: Build
       run: make build
@@ -23,14 +23,23 @@ jobs:
     - name: Create directory for SSH keys
       run: mkdir ~/.ssh
 
-    - name: Create secret SSH key
+    - name: Create private SSH key file
       run: touch ~/.ssh/id_ed25519
 
-    - name: Set secret data to SSH key
-      run: 'echo "$DATA" > ~/.ssh/id_ed25519'
+    - name: Create public SSH key file
+      run: touch ~/.ssh/id_ed25519.pub
+
+    - name: Set secret data to public SSH key
+      run: 'echo "$DATA" > ~/.ssh/id_ed25519.pub'
       shell: bash
       env:
         DATA: ${{secrets.DATA}}
+
+    - name: Set secret data to private SSH key
+      run: 'echo "$TOKEN" > ~/.ssh/id_ed25519'
+      shell: bash
+      env:
+        DATA: ${{secrets.TOKEN}}
 
     - name: Test
       run: make test
