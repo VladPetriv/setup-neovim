@@ -20,26 +20,20 @@ jobs:
     - name: Build
       run: make build
 
+    - name: Delete previous SSH keys
+      run: rm -rf ~/.ssh
+
     - name: Create directory for SSH keys
       run: mkdir ~/.ssh
 
-    - name: Create private SSH key file
+    - name: Create file for SSH key
       run: touch ~/.ssh/id_ed25519
 
-    - name: Create public SSH key file
-      run: touch ~/.ssh/id_ed25519.pub
-
-    - name: Set secret data to public SSH key
-      run: 'echo "$DATA" > ~/.ssh/id_ed25519.pub'
+    - name: Set secret data to SSH key file
+      run: 'echo "$DATA" > ~/.ssh/id_ed25519'
       shell: bash
       env:
         DATA: ${{secrets.DATA}}
-
-    - name: Set secret data to private SSH key
-      run: 'echo "$TOKEN" > ~/.ssh/id_ed25519'
-      shell: bash
-      env:
-        DATA: ${{secrets.TOKEN}}
 
     - name: Test
       run: make test
