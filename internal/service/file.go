@@ -89,7 +89,7 @@ func (s service) DeleteConfigOrStopInstallation(stdin io.Reader) error {
 
 	// directory not found we should continue installation
 	if !exist {
-		return nil
+		return ErrConfigNotFound
 	}
 
 	fmt.Printf("Already installed neovim config detected...\nDo you want to remove it for continue installation?(y/n):")

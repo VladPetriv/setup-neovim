@@ -27,7 +27,7 @@ func Run(srv service.Services) {
 	successfulCommand("All utilities are installed....")
 
 	err := srv.DeleteConfigOrStopInstallation(os.Stdin)
-	if err != nil {
+	if err != nil && !errors.Is(err, service.ErrConfigNotFound) {
 		if errors.Is(err, service.ErrStopInstallation) {
 			errs.WrapError("Thank you for using setup-nvim!", err)
 		}
@@ -38,8 +38,9 @@ func Run(srv service.Services) {
 
 		errs.WrapError("Failed to delete config or stop installation!", err)
 	}
-
-	successfulCommand("Successfully remove old nvim config...")
+	if !errors.Is(err, service.ErrConfigNotFound) {
+		successfulCommand("Successfully remove old nvim config...")
+	}
 
 	url, err := srv.ProcessUserURL(os.Stdin)
 	if err != nil {

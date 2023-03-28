@@ -27,6 +27,7 @@ var (
 	ErrEnterValidAnswer      = errors.New("please enter valid answer")
 	ErrDirectoryAlreadyExist = errors.New("config directory already exists")
 	ErrStopInstallation      = errors.New("stop config installation")
+	ErrConfigNotFound        = errors.New("nvim config not found")
 )
 
 const (
