@@ -83,8 +83,11 @@ func getConfigPath(repositoryPath string) (string, error) {
 
 func (s service) DeleteConfigOrStopInstallation(stdin io.Reader) error {
 	exist, err := s.checkIfConfigDirectoryIsExist()
-	if err != nil && !errors.Is(err, ErrDirectoryNotFound) {
-		return fmt.Errorf("check if config directory already exist: %w", err)
+	if err != nil {
+		// NOTE: When directory with config not found we need to continue installation process
+		if !errors.Is(err, ErrDirectoryNotFound) {
+			return fmt.Errorf("check if config directory already exist: %w", err)
+		}
 	}
 
 	// directory not found we should continue installation

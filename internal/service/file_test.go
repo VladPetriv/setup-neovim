@@ -17,7 +17,8 @@ func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel,l
 	t.Parallel()
 
 	testService := service.New(&service.Options{
-		Inputter:  input.New(),
+		Inputter: input.New(),
+
 		Validator: validation.New(),
 	})
 
@@ -52,18 +53,20 @@ func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel,l
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err = createDirectoryByType(tt.directoryType)
-			require.NoError(t, err)
+			assert.NoError(t, err)
+
+			t.Cleanup(func() {
+				err = os.RemoveAll(fmt.Sprintf("%s/.config/nvim", homeDir))
+				if err != nil {
+					require.NoError(t, err)
+				}
+			})
 
 			got := testService.ExtractAndMoveConfigDirectory(tt.input)
 			if tt.wantErr {
 				assert.Error(t, got)
 			} else {
 				assert.NoError(t, got)
-			}
-
-			err = os.RemoveAll(fmt.Sprintf("%s/.config/nvim", homeDir))
-			if err != nil {
-				require.NoError(t, err)
 			}
 		})
 	}
@@ -107,6 +110,9 @@ func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,
 
 	configPath := fmt.Sprintf("%s/.config/nvim", homeDir)
 
+	err = os.RemoveAll(configPath)
+	assert.NoError(t, err)
+
 	tests := []struct {
 		name                        string
 		input                       string
@@ -114,27 +120,26 @@ func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,
 		want                        error
 	}{
 		{
-			name:                        "DeleteConfigOrStopInstallation successful",
+			name:                        "successful with deleting of nvim config",
 			input:                       "y",
+			shouldCreateConfigDirectory: true,
 			want:                        nil,
-			shouldCreateConfigDirectory: true,
 		},
 		{
-			name:  "DeleteConfigOrStopInstallation successful with no needs to deleting config",
-			input: "",
-			want:  nil,
+			name: "successful with not found nvim config",
+			want: service.ErrConfigNotFound,
 		},
 		{
-			name:                        "DeleteConfigOrStopInstallation failed with stop installation",
+			name:                        "failed with stop of installation process",
 			input:                       "n",
-			want:                        service.ErrStopInstallation,
 			shouldCreateConfigDirectory: true,
+			want:                        service.ErrStopInstallation,
 		},
 		{
-			name:                        "DeleteConfigOrStopInstallation failed with invalid answer",
-			input:                       "hello",
-			want:                        service.ErrEnterValidAnswer,
+			name:                        "failed with invalid answer",
+			input:                       "invalid",
 			shouldCreateConfigDirectory: true,
+			want:                        service.ErrEnterValidAnswer,
 		},
 	}
 	for _, tt := range tests {
@@ -146,16 +151,18 @@ func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,
 
 			if tt.shouldCreateConfigDirectory {
 				err = os.MkdirAll(configPath, 0755)
-				require.NoError(t, err)
+				assert.NoError(t, err)
 			}
+
+			t.Cleanup(func() {
+				if tt.shouldCreateConfigDirectory {
+					err = os.RemoveAll(configPath)
+					assert.NoError(t, err)
+				}
+			})
 
 			got := testService.DeleteConfigOrStopInstallation(input)
 			assert.Equal(t, tt.want, got)
-
-			if tt.shouldCreateConfigDirectory {
-				err = os.RemoveAll(configPath)
-				require.NoError(t, err)
-			}
 		})
 	}
 }
