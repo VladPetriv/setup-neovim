@@ -9,6 +9,7 @@ import (
 	"github.com/VladPetriv/setup-neovim/internal/service"
 	"github.com/VladPetriv/setup-neovim/pkg/colors"
 	"github.com/VladPetriv/setup-neovim/pkg/errs"
+	"github.com/VladPetriv/setup-neovim/pkg/validation"
 )
 
 // commandTimeout represents timeout that should be after completing the previous function.
@@ -51,7 +52,11 @@ func Run(srv service.Services) {
 
 	err = srv.CloneAndValidateRepository(url, os.Stdin)
 	if err != nil {
-		errs.WrapError("Failed to clone repository or repository didn't have base files for nvim configuration", err)
+		if errors.Is(err, validation.ErrNoBaseFilesInRepository) {
+			errs.WrapError("Repository didn't have base files for nvim configuration!", err)
+		}
+
+		errs.WrapError("Failed to clone repository or validate repository!", err)
 	}
 
 	successfulCommand("Repository successfully cloned and checked for base files")
@@ -61,7 +66,7 @@ func Run(srv service.Services) {
 		errs.WrapError("Failed to extract and move config directory from repository", err)
 	}
 
-	successfulCommand("Config successfully extracted!")
+	successfulCommand("Config successfully extracted and moved to '.config' directory!")
 
 	packageManger, err := srv.ProcessPackageManagers(os.Stdin)
 	if err != nil {

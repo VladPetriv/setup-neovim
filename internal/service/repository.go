@@ -1,12 +1,14 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
 	"github.com/VladPetriv/setup-neovim/pkg/input"
+	"github.com/VladPetriv/setup-neovim/pkg/validation"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
@@ -36,6 +38,10 @@ func (s service) CloneAndValidateRepository(url string, stdin io.Reader) error {
 		removeErr := os.RemoveAll("nvim")
 		if removeErr != nil {
 			return fmt.Errorf("repository validation failed, failed to remove repository: %w", err)
+		}
+
+		if errors.Is(err, validation.ErrNoBaseFilesInRepository) {
+			return err
 		}
 
 		return fmt.Errorf("repository validation failed: %w", err)
