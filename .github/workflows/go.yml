@@ -23,6 +23,9 @@ jobs:
     - name: Delete previous SSH keys
       run: rm -rf ~/.ssh
 
+    - name: Delete previous installed package manager
+      run: rm -rf .local/share/nvim
+
     - name: Create directory for SSH keys
       run: mkdir ~/.ssh
 
