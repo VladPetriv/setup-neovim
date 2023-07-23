@@ -116,3 +116,25 @@ func installPacker() error {
 
 	return nil
 }
+
+func (s service) DetectInstalledPackageManagers() (map[string]bool, error) {
+	result := map[string]bool{
+		PackerPluginManager:  false,
+		VimPlugPluginManager: false,
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("get home directorY: %w", err)
+	}
+
+	if _, err = os.Lstat(fmt.Sprintf("%s/.local/share/nvim/site/autoload", homeDir)); err == nil {
+		result[VimPlugPluginManager] = true
+	}
+
+	if _, err = os.Lstat(fmt.Sprintf("%s/.local/share/nvim/site/pack", homeDir)); err == nil {
+		result[PackerPluginManager] = true
+	}
+
+	return result, nil
+}

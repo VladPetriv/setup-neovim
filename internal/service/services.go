@@ -20,6 +20,8 @@ type Services interface {
 	ExtractAndMoveConfigDirectory(path string) error
 	// DeleteConfigOrStopInstallation checks if nvim config is exist and ask permission for deleting it.
 	DeleteConfigOrStopInstallation(stdin io.Reader) error
+	// DetectInstalledPackageManagers check if user has installed of any package managers.
+	DetectInstalledPackageManagers() (map[string]bool, error)
 }
 
 var (
