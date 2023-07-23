@@ -84,26 +84,33 @@ func Run(srv service.Services) {
 		}
 	}
 
-	if alreadyInstalledManagersCount > 0 {
+	needToInstall := true
+
+	if alreadyInstalledManagersCount > 0 { //nolint:nestif // TODO: refactor this logic
 		err = srv.DeletePackageManagersIfNeeded(os.Stdin)
 		if err != nil {
-			if errors.Is(err, service.ErrEnterValidAnswer) {
-				errs.WrapError("Please choose correct answer for question!", err)
-			}
+			needToInstall = false
+			if !errors.Is(err, service.ErrNoNeedToDelete) {
+				if errors.Is(err, service.ErrEnterValidAnswer) {
+					errs.WrapError("Please choose correct answer for question!", err)
+				}
 
-			errs.WrapError("Failed to delete package managers!", err)
+				errs.WrapError("Failed to delete package managers!", err)
+			}
+		} else {
+			successfulCommand("Successfully remove all old package managers!")
+		}
+	}
+
+	if needToInstall {
+		packageManger, installErr := srv.InstallPackageManager(os.Stdin)
+		if installErr != nil {
+			errs.WrapError("Failed to install package manager. Please try again...", err)
 		}
 
-		successfulCommand("Successfully remove all old package managers!")
-	}
-
-	packageManger, err := srv.InstallPackageManager(os.Stdin)
-	if err != nil {
-		errs.WrapError("Failed to install package manager. Please try again...", err)
-	}
-
-	if packageManger != "" {
-		successfulCommand(fmt.Sprintf("%s successfully installed", packageManger))
+		if packageManger != "" {
+			successfulCommand(fmt.Sprintf("%s successfully installed", packageManger))
+		}
 	}
 
 	colors.Green("Nvim successfully configured!")

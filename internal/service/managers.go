@@ -164,8 +164,10 @@ func (s service) DeletePackageManagersIfNeeded(stdin io.Reader) error {
 			return fmt.Errorf("delete packer: %w", err)
 		}
 
-	case "n":
 		return nil
+
+	case "n":
+		return ErrNoNeedToDelete
 	default:
 		return ErrEnterValidAnswer
 	}
