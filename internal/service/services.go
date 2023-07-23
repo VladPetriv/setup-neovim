@@ -12,8 +12,8 @@ type Services interface {
 	ProcessUserURL(stdin io.Reader) (string, error)
 	// CloneAndValidateRepository clones git repository and check if repository have base files for nvim configuration
 	CloneAndValidateRepository(url string, stdin io.Reader) error
-	// ProcessPackageManagers ask user about package managers and install them if needed
-	ProcessPackageManagers(stdin io.Reader) (string, error)
+	// InstallPackageManager ask user about which package manager to install
+	InstallPackageManager(stdin io.Reader) (string, error)
 	// GetPackageMangerIfNotInstalled asks user if it has installed package manager and return name if it not installed
 	GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
@@ -22,6 +22,8 @@ type Services interface {
 	DeleteConfigOrStopInstallation(stdin io.Reader) error
 	// DetectInstalledPackageManagers check if user has installed of any package managers.
 	DetectInstalledPackageManagers() (map[string]bool, error)
+	// DeletePackageManagersIfNeeded ask user permission for deleting package managers and delete it if needed.
+	DeletePackageManagersIfNeeded(stdin io.Reader) error
 }
 
 var (

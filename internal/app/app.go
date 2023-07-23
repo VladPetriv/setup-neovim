@@ -68,7 +68,36 @@ func Run(srv service.Services) {
 
 	successfulCommand("Config successfully extracted and moved to '.config' directory!")
 
-	packageManger, err := srv.ProcessPackageManagers(os.Stdin)
+	alreadyInstalledManagers, err := srv.DetectInstalledPackageManagers()
+	if err != nil {
+		errs.WrapError("Failed to detect installed package managers", err)
+	}
+
+	var alreadyInstalledManagersCount int
+
+	for manager, installed := range alreadyInstalledManagers {
+		if installed {
+			alreadyInstalledManagersCount++
+			colors.Yellow(
+				fmt.Sprintf("Detected already installed package manager!\nPackage manager name: %s\n", manager),
+			)
+		}
+	}
+
+	if alreadyInstalledManagersCount > 0 {
+		err = srv.DeletePackageManagersIfNeeded(os.Stdin)
+		if err != nil {
+			if errors.Is(err, service.ErrEnterValidAnswer) {
+				errs.WrapError("Please choose correct answer for question!", err)
+			}
+
+			errs.WrapError("Failed to delete package managers!", err)
+		}
+
+		successfulCommand("Successfully remove all old package managers!")
+	}
+
+	packageManger, err := srv.InstallPackageManager(os.Stdin)
 	if err != nil {
 		errs.WrapError("Failed to install package manager. Please try again...", err)
 	}
