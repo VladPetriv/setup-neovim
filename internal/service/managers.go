@@ -2,6 +2,7 @@ package service
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -118,7 +119,7 @@ func installPacker() error {
 	return nil
 }
 
-func (s service) DetectInstalledPackageManagers() (map[string]bool, error) {
+func (s service) DetectInstalledPackageManagers() (string, int, error) {
 	result := map[string]bool{
 		PackerPluginManager:  false,
 		VimPlugPluginManager: false,
@@ -126,7 +127,7 @@ func (s service) DetectInstalledPackageManagers() (map[string]bool, error) {
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, fmt.Errorf("get home directorY: %w", err)
+		return "", 0, fmt.Errorf("get home directorY: %w", err)
 	}
 
 	if _, err = os.Lstat(fmt.Sprintf("%s/.local/share/nvim/site/autoload", homeDir)); err == nil {
@@ -137,12 +138,39 @@ func (s service) DetectInstalledPackageManagers() (map[string]bool, error) {
 		result[PackerPluginManager] = true
 	}
 
-	return result, nil
+	var count int
+	var message string
+
+	for manager, installed := range result {
+		if !installed {
+			continue
+		}
+
+		count++
+		message += fmt.Sprintf("Detected already installed package manager!\nPackage manager name: %s\n", manager)
+	}
+
+	return message, count, nil
 }
 
-func (s service) ProcessAlreadyInstalledPackageManagers(stdin io.Reader) {}
+func (s service) ProcessAlreadyInstalledPackageManagers(count int, stdin io.Reader) (bool, error) {
+	if count == 0 {
+		return true, nil
+	}
 
-func (s service) DeletePackageManagers(stdin io.Reader) error {
+	err := s.deletePackageManagers(stdin)
+	if err != nil {
+		if errors.Is(err, ErrNoNeedToDelete) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (s service) deletePackageManagers(stdin io.Reader) error {
 	fmt.Print("Do you want to remove old package managers and install new?(y/n): ")
 
 	reader := bufio.NewReader(stdin)

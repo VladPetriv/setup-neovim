@@ -21,12 +21,10 @@ type Services interface {
 	// DeleteConfigOrStopInstallation checks if nvim config is exist and ask permission for deleting it.
 	DeleteConfigOrStopInstallation(stdin io.Reader) error
 	// DetectInstalledPackageManagers check if user has installed of any package managers.
-	DetectInstalledPackageManagers() (map[string]bool, error)
+	DetectInstalledPackageManagers() (string, int, error)
 	// ProcessAlreadyInstalledPackageManagers is used to inform user about already installed managers
 	// and ask permission for deleting old and installing new.
-	ProcessAlreadyInstalledPackageManagers(stdin io.Reader)
-	// DeletePackageManagers ask user permission for deleting package managers and delete it if needed.
-	DeletePackageManagers(stdin io.Reader) error
+	ProcessAlreadyInstalledPackageManagers(countOfAlreadyInstalledManagers int, stdin io.Reader) (bool, error)
 }
 
 var (
