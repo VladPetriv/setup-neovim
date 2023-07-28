@@ -87,7 +87,7 @@ func Run(srv service.Services) {
 	needToInstall := true
 
 	if alreadyInstalledManagersCount > 0 { //nolint:nestif // TODO: refactor this logic
-		err = srv.DeletePackageManagersIfNeeded(os.Stdin)
+		err = srv.DeletePackageManagers(os.Stdin)
 		if err != nil {
 			needToInstall = false
 			if !errors.Is(err, service.ErrNoNeedToDelete) {

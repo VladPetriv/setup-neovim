@@ -22,8 +22,11 @@ type Services interface {
 	DeleteConfigOrStopInstallation(stdin io.Reader) error
 	// DetectInstalledPackageManagers check if user has installed of any package managers.
 	DetectInstalledPackageManagers() (map[string]bool, error)
-	// DeletePackageManagersIfNeeded ask user permission for deleting package managers and delete it if needed.
-	DeletePackageManagersIfNeeded(stdin io.Reader) error
+	// ProcessAlreadyInstalledPackageManagers is used to inform user about already installed managers
+	// and ask permission for deleting old and installing new.
+	ProcessAlreadyInstalledPackageManagers(stdin io.Reader)
+	// DeletePackageManagers ask user permission for deleting package managers and delete it if needed.
+	DeletePackageManagers(stdin io.Reader) error
 }
 
 var (

@@ -140,7 +140,9 @@ func (s service) DetectInstalledPackageManagers() (map[string]bool, error) {
 	return result, nil
 }
 
-func (s service) DeletePackageManagersIfNeeded(stdin io.Reader) error {
+func (s service) ProcessAlreadyInstalledPackageManagers(stdin io.Reader) {}
+
+func (s service) DeletePackageManagers(stdin io.Reader) error {
 	fmt.Print("Do you want to remove old package managers and install new?(y/n): ")
 
 	reader := bufio.NewReader(stdin)
