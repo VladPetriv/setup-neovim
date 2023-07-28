@@ -171,6 +171,4 @@ func (s service) DeletePackageManagersIfNeeded(stdin io.Reader) error {
 	default:
 		return ErrEnterValidAnswer
 	}
-
-	return nil
 }
