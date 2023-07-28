@@ -92,6 +92,131 @@ func TestManager_DetectInstalledPackageManagers(t *testing.T) {
 	}
 }
 
+func TestManager_ProcessAlreadyInstalledPackageManagers(t *testing.T) {
+	homeDir, err := os.UserHomeDir()
+	require.NoError(t, err)
+
+	testService := service.New(&service.Options{
+		Inputter:  input.New(),
+		Validator: validation.New(),
+	})
+
+	type precondition struct {
+		createPackerDir  bool
+		createVimPlugDir bool
+	}
+
+	type args struct {
+		count           int
+		wantRemoveInput string
+	}
+
+	type expected struct {
+		shouldInstall bool
+		err           error
+	}
+
+	tests := []struct {
+		name         string
+		precondition precondition
+		args         args
+		expected     expected
+	}{
+		{
+			name: "ProcessAlreadyInstalledPackageManagers successful with 2 deleted managers",
+			precondition: precondition{
+				createPackerDir:  true,
+				createVimPlugDir: true,
+			},
+			args: args{
+				count:           2,
+				wantRemoveInput: "y",
+			},
+			expected: expected{
+				shouldInstall: true,
+			},
+		},
+		{
+			name: "ProcessAlreadyInstalledPackageManagers successful with 1 deleted managers",
+			precondition: precondition{
+				createPackerDir: true,
+			},
+			args: args{
+				count:           1,
+				wantRemoveInput: "y",
+			},
+			expected: expected{
+				shouldInstall: true,
+			},
+		},
+		{
+			name: "ProcessAlreadyInstalledPackageManagers successful with no detected managers",
+			precondition: precondition{
+				createPackerDir: true,
+			},
+			args: args{
+				count: 0,
+			},
+			expected: expected{
+				shouldInstall: true,
+			},
+		},
+		{
+			name: "ProcessAlreadyInstalledPackageManagers failed with no need to delete",
+			precondition: precondition{
+				createPackerDir: true,
+			},
+			args: args{
+				count:           1,
+				wantRemoveInput: "n",
+			},
+			expected: expected{
+				shouldInstall: false,
+				err:           nil,
+			},
+		},
+		{
+			name: "ProcessAlreadyInstalledPackageManagers failed with invalid answer",
+			precondition: precondition{
+				createPackerDir: true,
+			},
+			args: args{
+				count:           1,
+				wantRemoveInput: "invalid",
+			},
+			expected: expected{
+				err: service.ErrEnterValidAnswer,
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			err = os.RemoveAll(fmt.Sprintf("%s/.local/share/nvim/site/pack", homeDir))
+			assert.NoError(t, err)
+			err = os.RemoveAll(fmt.Sprintf("%s/.local/share/nvim/site/autoload", homeDir))
+			assert.NoError(t, err)
+
+			if tt.precondition.createPackerDir {
+				err = os.MkdirAll(fmt.Sprintf("%s/.local/share/nvim/site/pack", homeDir), 0o755)
+				require.NoError(t, err)
+			}
+			if tt.precondition.createVimPlugDir {
+				err = os.MkdirAll(fmt.Sprintf("%s/.local/share/nvim/site/autoload", homeDir), 0o755)
+				require.NoError(t, err)
+			}
+
+			input := strings.NewReader(
+				fmt.Sprintf("%s\n", tt.args.wantRemoveInput),
+			)
+
+			actual, processErr := testService.ProcessAlreadyInstalledPackageManagers(tt.args.count, input)
+			assert.Equal(t, tt.expected.err, processErr)
+			assert.Equal(t, tt.expected.shouldInstall, actual)
+		})
+	}
+}
+
 func TestManager_ProcessInputForPackageManagers(t *testing.T) {
 	t.Parallel()
 
