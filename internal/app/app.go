@@ -22,7 +22,7 @@ func Run(srv service.Services) {
 			colors.Red(value)
 		}
 
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	successfulCommand("All utilities are installed....")
@@ -31,10 +31,6 @@ func Run(srv service.Services) {
 	if err != nil && !errors.Is(err, service.ErrConfigNotFound) {
 		if errors.Is(err, service.ErrStopInstallation) {
 			errs.WrapError("Thank you for using setup-nvim!", err)
-		}
-
-		if errors.Is(err, service.ErrEnterValidAnswer) {
-			errs.WrapError("Please choose correct answer for question!", err)
 		}
 
 		errs.WrapError("Failed to delete config or stop installation!", err)
@@ -68,8 +64,26 @@ func Run(srv service.Services) {
 
 	successfulCommand("Config successfully extracted and moved to '.config' directory!")
 
-	packageManger, err := srv.ProcessPackageManagers(os.Stdin)
+	message, count, err := srv.DetectInstalledPackageManagers()
 	if err != nil {
+		errs.WrapError("Failed to detect installed package managers", err)
+	}
+
+	colors.Yellow(message)
+
+	needToInstall, err := srv.ProcessAlreadyInstalledPackageManagers(count, os.Stdin)
+	if err != nil {
+		errs.WrapError("Failed to process already installed package managers!", err)
+	}
+
+	if !needToInstall {
+		colors.Green("Nvim successfully configured!")
+
+		os.Exit(0)
+	}
+
+	packageManger, installErr := srv.InstallPackageManager(os.Stdin)
+	if installErr != nil {
 		errs.WrapError("Failed to install package manager. Please try again...", err)
 	}
 

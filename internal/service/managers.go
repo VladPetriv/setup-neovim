@@ -2,16 +2,20 @@ package service
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 )
 
-func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
-	packageManager, err := s.GetPackageMangerIfNotInstalled(stdin)
+func (s service) InstallPackageManager(stdin io.Reader) (string, error) {
+	fmt.Print("Choose package manager(packer/vim-plug): ")
+
+	reader := bufio.NewReader(stdin)
+	packageManager, err := s.input.GetInput(reader)
 	if err != nil {
-		return "", fmt.Errorf("failed to process user input: %w", err)
+		return "", fmt.Errorf("get user input: %w", err)
 	}
 
 	switch packageManager {
@@ -29,8 +33,6 @@ func (s service) ProcessPackageManagers(stdin io.Reader) (string, error) {
 		}
 
 		return VimPlugPluginManager, nil
-	case "skip":
-		return "", nil
 	default:
 		return "", ErrEnterValidAnswer
 	}
@@ -115,4 +117,90 @@ func installPacker() error {
 	}
 
 	return nil
+}
+
+func (s service) DetectInstalledPackageManagers() (string, int, error) {
+	result := map[string]bool{
+		PackerPluginManager:  false,
+		VimPlugPluginManager: false,
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", 0, fmt.Errorf("get home directorY: %w", err)
+	}
+
+	if _, err = os.Lstat(fmt.Sprintf("%s/.local/share/nvim/site/autoload", homeDir)); err == nil {
+		result[VimPlugPluginManager] = true
+	}
+
+	if _, err = os.Lstat(fmt.Sprintf("%s/.local/share/nvim/site/pack", homeDir)); err == nil {
+		result[PackerPluginManager] = true
+	}
+
+	var count int
+	var message string
+
+	for manager, installed := range result {
+		if !installed {
+			continue
+		}
+
+		count++
+		message += fmt.Sprintf("Detected already installed package manager!\nPackage manager name: %s\n", manager)
+	}
+
+	return message, count, nil
+}
+
+func (s service) ProcessAlreadyInstalledPackageManagers(count int, stdin io.Reader) (bool, error) {
+	if count == 0 {
+		return true, nil
+	}
+
+	err := s.deletePackageManagers(stdin)
+	if err != nil {
+		if errors.Is(err, ErrNoNeedToDelete) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (s service) deletePackageManagers(stdin io.Reader) error {
+	fmt.Print("Do you want to remove old package managers and install new?(y/n): ")
+
+	reader := bufio.NewReader(stdin)
+	wantRemove, err := s.input.GetInput(reader)
+	if err != nil {
+		return fmt.Errorf("get user input: %w", err)
+	}
+
+	// TODo: We need to accept a map with already installed to delete only installed managers
+	// instead of trying to delete both
+	switch wantRemove {
+	case "y":
+		homeDir, homeDirErr := os.UserHomeDir()
+		if homeDirErr != nil {
+			return fmt.Errorf("get home directory: %w", err)
+		}
+
+		if err = os.RemoveAll(fmt.Sprintf("%s/.local/share/nvim/site/autoload", homeDir)); err != nil {
+			return fmt.Errorf("delete vim-plug: %w", err)
+		}
+
+		if err = os.RemoveAll(fmt.Sprintf("%s/.local/share/nvim/site/pack", homeDir)); err != nil {
+			return fmt.Errorf("delete packer: %w", err)
+		}
+
+		return nil
+
+	case "n":
+		return ErrNoNeedToDelete
+	default:
+		return ErrEnterValidAnswer
+	}
 }

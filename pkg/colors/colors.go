@@ -13,3 +13,8 @@ func Green(msg string) {
 	green := "\033[32m"
 	fmt.Printf("%s%s%s\n", green, msg, reset)
 }
+
+func Yellow(msg string) {
+	yellow := "\033[33m"
+	fmt.Printf("%s%s%s\n", yellow, msg, reset)
+}

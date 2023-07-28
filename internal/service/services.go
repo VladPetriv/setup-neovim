@@ -12,14 +12,19 @@ type Services interface {
 	ProcessUserURL(stdin io.Reader) (string, error)
 	// CloneAndValidateRepository clones git repository and check if repository have base files for nvim configuration
 	CloneAndValidateRepository(url string, stdin io.Reader) error
-	// ProcessPackageManagers ask user about package managers and install them if needed
-	ProcessPackageManagers(stdin io.Reader) (string, error)
+	// InstallPackageManager ask user about which package manager to install
+	InstallPackageManager(stdin io.Reader) (string, error)
 	// GetPackageMangerIfNotInstalled asks user if it has installed package manager and return name if it not installed
 	GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
 	ExtractAndMoveConfigDirectory(path string) error
 	// DeleteConfigOrStopInstallation checks if nvim config is exist and ask permission for deleting it.
 	DeleteConfigOrStopInstallation(stdin io.Reader) error
+	// DetectInstalledPackageManagers check if user has installed of any package managers.
+	DetectInstalledPackageManagers() (string, int, error)
+	// ProcessAlreadyInstalledPackageManagers is used to inform user about already installed managers
+	// and ask permission for deleting old and installing new.
+	ProcessAlreadyInstalledPackageManagers(countOfAlreadyInstalledManagers int, stdin io.Reader) (bool, error)
 }
 
 var (
@@ -28,6 +33,7 @@ var (
 	ErrDirectoryAlreadyExist = errors.New("config directory already exists")
 	ErrStopInstallation      = errors.New("stop config installation")
 	ErrConfigNotFound        = errors.New("nvim config not found")
+	ErrNoNeedToDelete        = errors.New("not need to delete")
 )
 
 const (
