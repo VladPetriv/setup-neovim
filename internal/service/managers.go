@@ -179,6 +179,8 @@ func (s service) deletePackageManagers(stdin io.Reader) error {
 		return fmt.Errorf("get user input: %w", err)
 	}
 
+	// TODo: We need to accept a map with already installed to delete only installed managers
+	// instead of trying to delete both
 	switch wantRemove {
 	case "y":
 		homeDir, homeDirErr := os.UserHomeDir()
