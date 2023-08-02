@@ -14,8 +14,6 @@ type Services interface {
 	CloneAndValidateRepository(url string, stdin io.Reader) error
 	// InstallPackageManager ask user about which package manager to install
 	InstallPackageManager(stdin io.Reader) (string, error)
-	// GetPackageMangerIfNotInstalled asks user if it has installed package manager and return name if it not installed
-	GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error)
 	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
 	ExtractAndMoveConfigDirectory(path string) error
 	// DeleteConfigOrStopInstallation checks if nvim config is exist and ask permission for deleting it.

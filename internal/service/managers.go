@@ -38,27 +38,6 @@ func (s service) InstallPackageManager(stdin io.Reader) (string, error) {
 	}
 }
 
-func (s service) GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error) {
-	fmt.Print("Do you have any package managers installed?(y/n): ")
-
-	reader := bufio.NewReader(stdin)
-	haveInstalledPackageManagers, err := s.input.GetInput(reader)
-	if err != nil {
-		return "", fmt.Errorf("get input for is user has installed pkg manager: %w", err)
-	}
-
-	switch haveInstalledPackageManagers {
-	case "y":
-		return "skip", nil
-	case "n":
-		fmt.Print("Choose package manager(packer/vim-plug): ")
-
-		return s.input.GetInput(reader)
-	default:
-		return "", nil
-	}
-}
-
 func installVimPlug() error {
 	file, err := os.Create("vim-plug.sh")
 	if err != nil {
