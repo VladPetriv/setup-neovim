@@ -26,15 +26,13 @@ type Services interface {
 }
 
 type ManagerService interface {
-
-	// InstallPackageManager ask user about which package manager to install and install it.
-	InstallPackageManager(stdin io.Reader) (string, error)
-
 	// DetectInstalledPackageManagers check if user has already installed package managers.
 	DetectInstalledPackageManagers() (string, int, error)
 	// ProcessAlreadyInstalledPackageManagers inform user about already installed package managers
 	// and ask user permission for deleting them and deletet them if user want it.
 	ProcessAlreadyInstalledPackageManagers(countOfAlreadyInstalledManagers int, stdin io.Reader) (bool, error)
+	// InstallPackageManager ask user about which package manager to install and install it.
+	InstallPackageManager(stdin io.Reader) (string, error)
 }
 
 var (
