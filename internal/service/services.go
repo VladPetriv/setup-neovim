@@ -25,6 +25,18 @@ type Services interface {
 	ProcessAlreadyInstalledPackageManagers(countOfAlreadyInstalledManagers int, stdin io.Reader) (bool, error)
 }
 
+type ManagerService interface {
+
+	// InstallPackageManager ask user about which package manager to install and install it.
+	InstallPackageManager(stdin io.Reader) (string, error)
+
+	// DetectInstalledPackageManagers check if user has already installed package managers.
+	DetectInstalledPackageManagers() (string, int, error)
+	// ProcessAlreadyInstalledPackageManagers inform user about already installed package managers
+	// and ask user permission for deleting them and deletet them if user want it.
+	ProcessAlreadyInstalledPackageManagers(countOfAlreadyInstalledManagers int, stdin io.Reader) (bool, error)
+}
+
 var (
 	ErrDirectoryNotFound     = errors.New("directory not found")
 	ErrEnterValidAnswer      = errors.New("please enter valid answer")
@@ -33,6 +45,8 @@ var (
 	ErrConfigNotFound        = errors.New("nvim config not found")
 	ErrNoNeedToDelete        = errors.New("not need to delete")
 )
+
+// TODO: Create a custom type for package managers
 
 const (
 	PackerPluginManager  = "packer"
