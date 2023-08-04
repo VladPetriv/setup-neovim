@@ -35,6 +35,13 @@ type ManagerService interface {
 	InstallPackageManager(stdin io.Reader) (string, error)
 }
 
+type RepositoryService interface {
+	// ProcessUserURL get URL by user input and validate them
+	ProcessUserURL(stdin io.Reader) (string, error)
+	// CloneAndValidateRepository clones git repository and check if repository have base files for nvim configuration
+	CloneAndValidateRepository(url string, stdin io.Reader) error
+}
+
 var (
 	ErrDirectoryNotFound     = errors.New("directory not found")
 	ErrEnterValidAnswer      = errors.New("please enter valid answer")
