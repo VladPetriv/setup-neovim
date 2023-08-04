@@ -42,6 +42,15 @@ type RepositoryService interface {
 	CloneAndValidateRepository(url string, stdin io.Reader) error
 }
 
+type FileService interface {
+	// CheckUtilStatus check if nvim and git are installed
+	CheckUtilStatus() map[string]string
+	// DeleteConfigOrStopInstallation checks if nvim config is exist and ask permission for deleting it.
+	DeleteConfigOrStopInstallation(stdin io.Reader) error
+	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
+	ExtractAndMoveConfigDirectory(path string) error
+}
+
 var (
 	ErrDirectoryNotFound     = errors.New("directory not found")
 	ErrEnterValidAnswer      = errors.New("please enter valid answer")
