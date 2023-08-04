@@ -7,9 +7,28 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/VladPetriv/setup-neovim/pkg/input"
+	"github.com/VladPetriv/setup-neovim/pkg/validation"
 )
 
-func (s service) ExtractAndMoveConfigDirectory(repositoryPath string) error {
+type fileService struct {
+	inputter  input.Inputter
+	validator validation.Validator
+}
+
+func NewFile(inputter input.Inputter, validator validation.Validator) *fileService {
+	return &fileService{
+		inputter:  inputter,
+		validator: validator,
+	}
+}
+
+func (f fileService) CheckUtilStatus() map[string]string {
+	return f.validator.ValidateConsoleUtilities()
+}
+
+func (f fileService) ExtractAndMoveConfigDirectory(repositoryPath string) error {
 	configPath, err := getConfigPath(repositoryPath)
 	if err != nil {
 		return fmt.Errorf("get config path: %w", err)
@@ -81,8 +100,8 @@ func getConfigPath(repositoryPath string) (string, error) {
 	return dirPath, nil
 }
 
-func (s service) DeleteConfigOrStopInstallation(stdin io.Reader) error {
-	exist, err := s.checkIfConfigDirectoryIsExist()
+func (f fileService) DeleteConfigOrStopInstallation(stdin io.Reader) error {
+	exist, err := checkIfConfigDirectoryIsExist()
 	if err != nil {
 		// NOTE: When directory with config not found we need to continue installation process
 		if !errors.Is(err, ErrDirectoryNotFound) {
@@ -96,14 +115,14 @@ func (s service) DeleteConfigOrStopInstallation(stdin io.Reader) error {
 	}
 
 	fmt.Printf("Already installed neovim config detected...\nDo you want to remove it for continue installation?(y/n):")
-	shouldStopOrContinueInstallation, err := s.input.GetInput(stdin)
+	shouldStopOrContinueInstallation, err := f.inputter.GetInput(stdin)
 	if err != nil {
-		return fmt.Errorf("get user input for is user want to continue installation or not: %w", err)
+		return fmt.Errorf("get user input: %w", err)
 	}
 
 	switch shouldStopOrContinueInstallation {
 	case "y":
-		return s.deleteConfig()
+		return deleteConfig()
 	case "n":
 		return ErrStopInstallation
 	default:
@@ -112,7 +131,7 @@ func (s service) DeleteConfigOrStopInstallation(stdin io.Reader) error {
 }
 
 // checkIfConfigDirectoryIsExist checks if config directory existed by default path.
-func (s service) checkIfConfigDirectoryIsExist() (bool, error) {
+func checkIfConfigDirectoryIsExist() (bool, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return false, fmt.Errorf("get home directory: %w", err)
@@ -125,7 +144,7 @@ func (s service) checkIfConfigDirectoryIsExist() (bool, error) {
 	return true, nil
 }
 
-func (s service) deleteConfig() error {
+func deleteConfig() error {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("get home directory: %w", err)
