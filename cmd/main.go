@@ -11,10 +11,11 @@ func main() {
 	validator := validation.New()
 	inputter := input.New()
 
-	service := service.New(&service.Options{
-		Validator: validator,
-		Inputter:  inputter,
-	})
+	services := service.Services{
+		File:       service.NewFile(inputter, validator),
+		Manager:    service.NewManager(inputter),
+		Repository: service.NewRepository(inputter, validator),
+	}
 
-	app.Run(service)
+	app.Run(services)
 }

@@ -7,119 +7,23 @@ import (
 	"io"
 	"os"
 	"os/exec"
+
+	"github.com/VladPetriv/setup-neovim/pkg/input"
 )
 
-func (s service) InstallPackageManager(stdin io.Reader) (string, error) {
-	fmt.Print("Choose package manager(packer/vim-plug): ")
+type managerService struct {
+	inputter input.Inputter
+}
 
-	reader := bufio.NewReader(stdin)
-	packageManager, err := s.input.GetInput(reader)
-	if err != nil {
-		return "", fmt.Errorf("get user input: %w", err)
-	}
+var _ ManagerService = (*managerService)(nil)
 
-	switch packageManager {
-	case PackerPluginManager:
-		err = installPacker()
-		if err != nil {
-			return "", fmt.Errorf("install packer: %w", err)
-		}
-
-		return PackerPluginManager, nil
-	case VimPlugPluginManager:
-		err = installVimPlug()
-		if err != nil {
-			return "", fmt.Errorf("install vim-plug: %w", err)
-		}
-
-		return VimPlugPluginManager, nil
-	default:
-		return "", ErrEnterValidAnswer
+func NewManager(inputter input.Inputter) ManagerService {
+	return &managerService{
+		inputter: inputter,
 	}
 }
 
-func (s service) GetPackageMangerIfNotInstalled(stdin io.Reader) (string, error) {
-	fmt.Print("Do you have any package managers installed?(y/n): ")
-
-	reader := bufio.NewReader(stdin)
-	haveInstalledPackageManagers, err := s.input.GetInput(reader)
-	if err != nil {
-		return "", fmt.Errorf("get input for is user has installed pkg manager: %w", err)
-	}
-
-	switch haveInstalledPackageManagers {
-	case "y":
-		return "skip", nil
-	case "n":
-		fmt.Print("Choose package manager(packer/vim-plug): ")
-
-		return s.input.GetInput(reader)
-	default:
-		return "", nil
-	}
-}
-
-func installVimPlug() error {
-	file, err := os.Create("vim-plug.sh")
-	if err != nil {
-		return fmt.Errorf("create file for installing script: %w", err)
-	}
-
-	_, err = file.Write([]byte(
-		`
-      #!/bin/sh
-      curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    `,
-	))
-	if err != nil {
-		return fmt.Errorf("write data to installing script file: %w", err)
-	}
-
-	cmd := exec.Command("/bin/sh", "vim-plug.sh")
-	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("execute script for vim plug installation: %w", err)
-	}
-
-	err = os.Remove("./vim-plug.sh")
-	if err != nil {
-		return fmt.Errorf("remove installation script file: %w", err)
-	}
-
-	return nil
-}
-
-func installPacker() error {
-	file, err := os.Create("packer.sh")
-	if err != nil {
-		return fmt.Errorf("create file for installing script: %w", err)
-	}
-
-	_, err = file.Write([]byte(
-		`
-      #!/bin/sh
-      git clone --depth 1 https://github.com/wbthomason/packer.nvim\
-        ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-    `,
-	))
-	if err != nil {
-		return fmt.Errorf("write data to installing script file: %w", err)
-	}
-
-	cmd := exec.Command("/bin/sh", "packer.sh")
-	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("execute script for packer installation: %w", err)
-	}
-
-	err = os.Remove("./packer.sh")
-	if err != nil {
-		return fmt.Errorf("remove installation script file: %w", err)
-	}
-
-	return nil
-}
-
-func (s service) DetectInstalledPackageManagers() (string, int, error) {
+func (m managerService) DetectInstalledPackageManagers() (string, int, error) {
 	result := map[string]bool{
 		PackerPluginManager:  false,
 		VimPlugPluginManager: false,
@@ -153,12 +57,12 @@ func (s service) DetectInstalledPackageManagers() (string, int, error) {
 	return message, count, nil
 }
 
-func (s service) ProcessAlreadyInstalledPackageManagers(count int, stdin io.Reader) (bool, error) {
+func (m managerService) ProcessAlreadyInstalledPackageManagers(count int, stdin io.Reader) (bool, error) {
 	if count == 0 {
 		return true, nil
 	}
 
-	err := s.deletePackageManagers(stdin)
+	err := m.deletePackageManagers(stdin)
 	if err != nil {
 		if errors.Is(err, ErrNoNeedToDelete) {
 			return false, nil
@@ -170,16 +74,17 @@ func (s service) ProcessAlreadyInstalledPackageManagers(count int, stdin io.Read
 	return true, nil
 }
 
-func (s service) deletePackageManagers(stdin io.Reader) error {
+// TODO: This function should not be as structure method.
+func (m managerService) deletePackageManagers(stdin io.Reader) error {
 	fmt.Print("Do you want to remove old package managers and install new?(y/n): ")
 
 	reader := bufio.NewReader(stdin)
-	wantRemove, err := s.input.GetInput(reader)
+	wantRemove, err := m.inputter.GetInput(reader)
 	if err != nil {
 		return fmt.Errorf("get user input: %w", err)
 	}
 
-	// TODo: We need to accept a map with already installed to delete only installed managers
+	// TODO: We need to accept a map with already installed to delete only installed managers
 	// instead of trying to delete both
 	switch wantRemove {
 	case "y":
@@ -203,4 +108,93 @@ func (s service) deletePackageManagers(stdin io.Reader) error {
 	default:
 		return ErrEnterValidAnswer
 	}
+}
+
+func (m managerService) InstallPackageManager(stdin io.Reader) (string, error) {
+	fmt.Print("Choose package manager(packer/vim-plug): ")
+
+	reader := bufio.NewReader(stdin)
+	packageManager, err := m.inputter.GetInput(reader)
+	if err != nil {
+		return "", fmt.Errorf("get user input: %w", err)
+	}
+
+	switch packageManager {
+	case PackerPluginManager:
+		err = installPacker()
+		if err != nil {
+			return "", fmt.Errorf("install packer: %w", err)
+		}
+
+		return PackerPluginManager, nil
+	case VimPlugPluginManager:
+		err = installVimPlug()
+		if err != nil {
+			return "", fmt.Errorf("install vim-plug: %w", err)
+		}
+
+		return VimPlugPluginManager, nil
+	default:
+		return "", ErrEnterValidAnswer
+	}
+}
+
+func installVimPlug() error {
+	file, err := os.Create("vim-plug.sh")
+	if err != nil {
+		return fmt.Errorf("create file for installing script: %w", err)
+	}
+
+	_, err = file.Write([]byte(
+		`
+      #!/bin/sh
+      curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    `,
+	))
+	if err != nil {
+		return fmt.Errorf("write data to installing script file: %w", err)
+	}
+
+	cmd := exec.Command("/bin/sh", "vim-plug.sh")
+	if err = cmd.Run(); err != nil {
+		return fmt.Errorf("execute installation script file: %w", err)
+	}
+
+	err = os.Remove("./vim-plug.sh")
+	if err != nil {
+		return fmt.Errorf("remove installation script file: %w", err)
+	}
+
+	return nil
+}
+
+func installPacker() error {
+	file, err := os.Create("packer.sh")
+	if err != nil {
+		return fmt.Errorf("create file for installing script: %w", err)
+	}
+
+	_, err = file.Write([]byte(
+		`
+      #!/bin/sh
+      git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+        ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+    `,
+	))
+	if err != nil {
+		return fmt.Errorf("write data to installing script file: %w", err)
+	}
+
+	cmd := exec.Command("/bin/sh", "packer.sh")
+	if err = cmd.Run(); err != nil {
+		return fmt.Errorf("execute installation script file: %w", err)
+	}
+
+	err = os.Remove("./packer.sh")
+	if err != nil {
+		return fmt.Errorf("remove installation script file: %w", err)
+	}
+
+	return nil
 }

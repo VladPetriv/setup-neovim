@@ -16,7 +16,7 @@ import (
 const commandTimeout = 1 * time.Second
 
 func Run(srv service.Services) {
-	utilErrors := srv.CheckUtilStatus()
+	utilErrors := srv.File.CheckUtilStatus()
 	if len(utilErrors) >= 1 {
 		for _, value := range utilErrors {
 			colors.Red(value)
@@ -27,7 +27,7 @@ func Run(srv service.Services) {
 
 	successfulCommand("All utilities are installed....")
 
-	err := srv.DeleteConfigOrStopInstallation(os.Stdin)
+	err := srv.File.DeleteConfigOrStopInstallation(os.Stdin)
 	if err != nil && !errors.Is(err, service.ErrConfigNotFound) {
 		if errors.Is(err, service.ErrStopInstallation) {
 			errs.WrapError("Thank you for using setup-nvim!", err)
@@ -39,14 +39,14 @@ func Run(srv service.Services) {
 		successfulCommand("Successfully remove old nvim config...")
 	}
 
-	url, err := srv.ProcessUserURL(os.Stdin)
+	url, err := srv.Repository.ProcessUserURL(os.Stdin)
 	if err != nil {
 		errs.WrapError("Validation for URL failed! Please try again... ", err)
 	}
 
 	successfulCommand("URL is valid...")
 
-	err = srv.CloneAndValidateRepository(url, os.Stdin)
+	err = srv.Repository.CloneAndValidateRepository(url, os.Stdin)
 	if err != nil {
 		if errors.Is(err, validation.ErrNoBaseFilesInRepository) {
 			errs.WrapError("Repository didn't have base files for nvim configuration!", err)
@@ -57,21 +57,21 @@ func Run(srv service.Services) {
 
 	successfulCommand("Repository successfully cloned and checked for base files")
 
-	err = srv.ExtractAndMoveConfigDirectory("./nvim")
+	err = srv.File.ExtractAndMoveConfigDirectory("./nvim")
 	if err != nil {
 		errs.WrapError("Failed to extract and move config directory from repository", err)
 	}
 
 	successfulCommand("Config successfully extracted and moved to '.config' directory!")
 
-	message, count, err := srv.DetectInstalledPackageManagers()
+	message, count, err := srv.Manager.DetectInstalledPackageManagers()
 	if err != nil {
 		errs.WrapError("Failed to detect installed package managers", err)
 	}
 
 	colors.Yellow(message)
 
-	needToInstall, err := srv.ProcessAlreadyInstalledPackageManagers(count, os.Stdin)
+	needToInstall, err := srv.Manager.ProcessAlreadyInstalledPackageManagers(count, os.Stdin)
 	if err != nil {
 		errs.WrapError("Failed to process already installed package managers!", err)
 	}
@@ -82,7 +82,7 @@ func Run(srv service.Services) {
 		os.Exit(0)
 	}
 
-	packageManger, installErr := srv.InstallPackageManager(os.Stdin)
+	packageManger, installErr := srv.Manager.InstallPackageManager(os.Stdin)
 	if installErr != nil {
 		errs.WrapError("Failed to install package manager. Please try again...", err)
 	}
