@@ -15,10 +15,7 @@ import (
 func TestRepository_CloneAndValidateRepository(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with go-git
 	t.Parallel()
 
-	testService := service.New(&service.Options{
-		Inputter:  input.New(),
-		Validator: validation.New(),
-	})
+	testService := service.NewRepository(input.New(), validation.New())
 
 	tests := []struct {
 		name          string
@@ -72,6 +69,52 @@ func TestRepository_CloneAndValidateRepository(t *testing.T) { //nolint:tparalle
 			if err != nil {
 				t.Fatal(err)
 			}
+		})
+	}
+}
+
+func TestRepository_ProcessUserURL(t *testing.T) {
+	t.Parallel()
+
+	testService := service.NewRepository(input.New(), validation.New())
+
+	tests := []struct {
+		name        string
+		input       string
+		expectedURL string
+		expectedErr error
+	}{
+		{
+			name:        "ProcessUserURL success with valid host[github]",
+			input:       "git@github.com:VladPetriv/setup-neovim.git",
+			expectedURL: "git@github.com:VladPetriv/setup-neovim.git",
+			expectedErr: nil,
+		},
+		{
+			name:        "ProcessUserURL success with valid host[gitlab]",
+			input:       "git@gitlab.com:gitlab-org/gitaly.git",
+			expectedURL: "git@gitlab.com:gitlab-org/gitaly.git",
+			expectedErr: nil,
+		},
+		{
+			name:        "ProcessUserURL fail with invalid host",
+			input:       "test",
+			expectedURL: "",
+			expectedErr: validation.ErrURLContainsInvalidHost,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var stdin bytes.Buffer
+			stdin.Write([]byte(fmt.Sprintf("%s\n", tt.input)))
+
+			url, err := testService.ProcessUserURL(&stdin)
+			assert.Equal(t, tt.expectedErr, err)
+			assert.Equal(t, tt.expectedURL, url)
 		})
 	}
 }

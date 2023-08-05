@@ -208,4 +208,3 @@ func TestManager_ProcessAlreadyInstalledPackageManagers(t *testing.T) {
 			assert.Equal(t, tt.expected.shouldInstall, actual)
 		})
 	}
-}
