@@ -46,8 +46,6 @@ var (
 	ErrNoNeedToDelete        = errors.New("not need to delete")
 )
 
-// TODO: Create a custom type for package managers
-
 const (
 	PackerPluginManager  = "packer"
 	VimPlugPluginManager = "vim-plug"
