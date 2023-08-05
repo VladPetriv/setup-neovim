@@ -2,21 +2,17 @@
 
 setup-nvim is a simple cli utility for setup your neovim by configs from open source repositories.
 
-Video example of how it works:
-
-[Video example of how it works](https://user-images.githubusercontent.com/80276277/215291221-6e588f9e-de61-49c2-bd4f-050ba295ac57.webm)
-
-
 
 ## Features 🤔
 
-- Copy neovim configs from Github and GitLab by `HTTP` or `SSH` links
-- Auto extract neovim config from repository if it's not main directory
-- Install package managers [Packer, VimPlug] 
-- Validation for URL
-- Validation for repository files
-- Colored input and output
-- Check if config already exists and ask permission for deleting it
+- Copy neovim configs from Github and GitLab by `HTTP` or `SSH` links.
+- Auto extract neovim config from repository if it's not main directory.
+- Install package managers [Packer, VimPlug].
+- Validation for URL.
+- Validation for repository files.
+- Colored input and output.
+- Check if config already exists and ask permission for deleting it.
+- Detect already installed package managers and ask permission for deleting them.
 
 ## How to install ✅?
 
