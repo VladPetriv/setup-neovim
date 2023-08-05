@@ -8,7 +8,6 @@ import (
 
 	"github.com/VladPetriv/setup-neovim/internal/service"
 	"github.com/VladPetriv/setup-neovim/pkg/input"
-	"github.com/VladPetriv/setup-neovim/pkg/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,10 +16,7 @@ func TestManager_DetectInstalledPackageManagers(t *testing.T) {
 	homeDir, err := os.UserHomeDir()
 	require.NoError(t, err)
 
-	testService := service.New(&service.Options{
-		Inputter:  input.New(),
-		Validator: validation.New(),
-	})
+	testService := service.NewManager(input.New())
 
 	type precondition struct {
 		createPackerDir  bool
@@ -96,10 +92,7 @@ func TestManager_ProcessAlreadyInstalledPackageManagers(t *testing.T) {
 	homeDir, err := os.UserHomeDir()
 	require.NoError(t, err)
 
-	testService := service.New(&service.Options{
-		Inputter:  input.New(),
-		Validator: validation.New(),
-	})
+	testService := service.NewManager(input.New())
 
 	type precondition struct {
 		createPackerDir  bool
