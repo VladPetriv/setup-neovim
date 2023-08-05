@@ -16,11 +16,7 @@ import (
 func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with dirs
 	t.Parallel()
 
-	testService := service.New(&service.Options{
-		Inputter: input.New(),
-
-		Validator: validation.New(),
-	})
+	testService := service.NewFile(input.New(), validation.New())
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -100,10 +96,7 @@ func createDirectoryByType(directoryType string) error {
 func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with dirs
 	t.Parallel()
 
-	testService := service.New(&service.Options{
-		Inputter:  input.New(),
-		Validator: validation.New(),
-	})
+	testService := service.NewFile(input.New(), validation.New())
 
 	homeDir, err := os.UserHomeDir()
 	require.NoError(t, err)
