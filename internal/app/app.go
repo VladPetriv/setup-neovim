@@ -16,7 +16,6 @@ import (
 const commandTimeout = 1 * time.Second
 
 func Run(srv service.Services) {
-
 	utilErrors := srv.File.CheckUtilStatus()
 	if len(utilErrors) >= 1 {
 		for _, value := range utilErrors {

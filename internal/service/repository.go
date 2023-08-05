@@ -18,7 +18,7 @@ type repositoryService struct {
 	validator validation.Validator
 }
 
-func NewRepository(inputter input.Inputter, validator validation.Validator) *repositoryService {
+func NewRepository(inputter input.Inputter, validator validation.Validator) RepositoryService {
 	return &repositoryService{
 		inputter:  inputter,
 		validator: validator,

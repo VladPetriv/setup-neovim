@@ -17,7 +17,7 @@ type fileService struct {
 	validator validation.Validator
 }
 
-func NewFile(inputter input.Inputter, validator validation.Validator) *fileService {
+func NewFile(inputter input.Inputter, validator validation.Validator) FileService {
 	return &fileService{
 		inputter:  inputter,
 		validator: validator,
