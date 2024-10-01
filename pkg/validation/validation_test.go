@@ -36,7 +36,6 @@ func TestValidator_ValidateURL(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -76,7 +75,6 @@ func TestValidator_ValidateRepoFiles(t *testing.T) { //nolint:tparallel,lll // t
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err := os.Mkdir("nvim", 0o755)
 			if err != nil {

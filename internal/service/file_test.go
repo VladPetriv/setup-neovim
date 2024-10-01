@@ -13,9 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with dirs
-	t.Parallel()
-
+func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) {
 	testService := service.NewFile(input.New(), validation.New())
 
 	homeDir, err := os.UserHomeDir()
@@ -46,7 +44,6 @@ func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) { //nolint:tparallel,l
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err = createDirectoryByType(tt.directoryType)
 			assert.NoError(t, err)
@@ -136,7 +133,6 @@ func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			input := strings.NewReader(
 				fmt.Sprintf("%s\n", tt.input),

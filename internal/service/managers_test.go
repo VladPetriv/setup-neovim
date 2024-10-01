@@ -57,7 +57,6 @@ func TestManager_DetectInstalledPackageManagers(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err = os.RemoveAll(fmt.Sprintf("%s/.local/share/nvim/site/pack", homeDir))
 			assert.NoError(t, err)
@@ -183,7 +182,6 @@ func TestManager_ProcessAlreadyInstalledPackageManagers(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err = os.RemoveAll(fmt.Sprintf("%s/.local/share/nvim/site/pack", homeDir))
 			assert.NoError(t, err)

@@ -53,7 +53,6 @@ func TestRepository_CloneAndValidateRepository(t *testing.T) { //nolint:tparalle
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			var stdin bytes.Buffer
 			stdin.Write([]byte(fmt.Sprintf("%s\n", tt.inputFilePath)))
@@ -105,7 +104,6 @@ func TestRepository_ProcessUserURL(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
