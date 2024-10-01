@@ -2,46 +2,46 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.19
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.23
 
-    - name: Build
-      run: make build
+      - name: Build
+        run: make build
 
-    - name: Delete previous SSH keys
-      run: rm -rf ~/.ssh
+      - name: Delete previous SSH keys
+        run: rm -rf ~/.ssh
 
-    - name: Delete previous installed package manager
-      run: rm -rf .local/share/nvim
+      - name: Delete previous installed package manager
+        run: rm -rf .local/share/nvim
 
-    - name: Create directory for SSH keys
-      run: mkdir ~/.ssh
+      - name: Create directory for SSH keys
+        run: mkdir ~/.ssh
 
-    - name: Create file for SSH key
-      run: touch ~/.ssh/id_ed25519
+      - name: Create file for SSH key
+        run: touch ~/.ssh/id_ed25519
 
-    - name: Set secret data to SSH key file
-      run: 'echo "$DATA" > ~/.ssh/id_ed25519'
-      shell: bash
-      env:
-        DATA: ${{secrets.DATA}}
+      - name: Set secret data to SSH key file
+        run: 'echo "$DATA" > ~/.ssh/id_ed25519'
+        shell: bash
+        env:
+          DATA: ${{secrets.DATA}}
 
-    - name: Test
-      run: make test
+      - name: Test
+        run: make test
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      env:  
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
