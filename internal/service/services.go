@@ -33,8 +33,10 @@ type FileService interface {
 	CheckUtilStatus() map[string]string
 	// DeleteConfigOrStopInstallation checks if nvim config is exist and ask permission for deleting it.
 	DeleteConfigOrStopInstallation(stdin io.Reader) error
-	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config folder
+	// ExtractAndMoveConfigDirectory get config directory from repository and move it to .config directory.
 	ExtractAndMoveConfigDirectory(path string) error
+	// DeleteRepositoryDirectory isused to delete repository directory.
+	DeleteRepositoryDirectory(path string) error
 }
 
 var (
@@ -49,4 +51,7 @@ var (
 const (
 	PackerPluginManager  = "packer"
 	VimPlugPluginManager = "vim-plug"
+
+	DirectoryNameForClonnedRepository = "nvim"
+	systemNeovimConfigPath            = ".config/nvim"
 )
