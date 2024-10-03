@@ -97,6 +97,11 @@ func moveConfigDirectory(configPath string) error {
 	return nil
 }
 
+const (
+	positiveAnswer = "y"
+	negativeAnswer = "n"
+)
+
 func (f fileService) DeleteConfigOrStopInstallation(stdin io.Reader) error {
 	exist, err := checkIfConfigDirectoryIsExist()
 	if err != nil {
@@ -118,9 +123,9 @@ func (f fileService) DeleteConfigOrStopInstallation(stdin io.Reader) error {
 	}
 
 	switch shouldStopOrContinueInstallation {
-	case "y":
+	case positiveAnswer:
 		return deleteConfig()
-	case "n":
+	case negativeAnswer:
 		return ErrStopInstallation
 	default:
 		return ErrEnterValidAnswer
@@ -134,7 +139,7 @@ func checkIfConfigDirectoryIsExist() (bool, error) {
 		return false, fmt.Errorf("get home directory: %w", err)
 	}
 
-	_, err = os.Lstat(fmt.Sprintf("%s/.config/nvim", homeDir))
+	_, err = os.Lstat(fmt.Sprintf("%s/%s", homeDir, systemNeovimConfigPath))
 	if err != nil {
 		return false, ErrDirectoryNotFound
 	}
@@ -148,7 +153,8 @@ func deleteConfig() error {
 		return fmt.Errorf("get home directory: %w", err)
 	}
 
-	if err = os.RemoveAll(fmt.Sprintf("%s/.config/nvim", homeDir)); err != nil {
+	err = os.RemoveAll(fmt.Sprintf("%s/%s", homeDir, systemNeovimConfigPath))
+	if err != nil {
 		return fmt.Errorf("remove existed config directory: %w", err)
 	}
 
