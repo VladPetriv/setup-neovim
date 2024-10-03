@@ -154,3 +154,16 @@ func deleteConfig() error {
 
 	return nil
 }
+
+func (f fileService) DeleteRepositoryDirectory(path string) error {
+	if path == "" {
+		return nil
+	}
+
+	err := os.RemoveAll(path)
+	if err != nil {
+		return fmt.Errorf("remove directory by path: %w", err)
+	}
+
+	return nil
+}
