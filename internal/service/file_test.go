@@ -155,3 +155,47 @@ func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,
 		})
 	}
 }
+
+func TestFile_DeleteRepositoryDirectory(t *testing.T) {
+	testService := service.NewFile(input.New(), validation.New())
+
+	tests := []struct {
+		name            string
+		input           string
+		wantErr         bool
+		createDirectory bool
+	}{
+		{
+			name:    "failed by directory not found",
+			input:   "./test_delete_not_found",
+			wantErr: true,
+		},
+		{
+			name:            "successful by deleting input directory",
+			input:           "./test_delete_found",
+			createDirectory: true,
+		},
+		{
+			name:  "successful by doing nothing due to empty directory path",
+			input: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.createDirectory {
+				err := os.MkdirAll(tt.input, 0755)
+				if err != nil {
+					assert.NoError(t, err)
+				}
+			}
+
+			got := testService.DeleteRepositoryDirectory(tt.input)
+			assert.NoError(t, got)
+
+			if tt.createDirectory {
+				_, err := os.Lstat(tt.input)
+				assert.Errorf(t, err, "input directory is not deleted. Directory path: %s", tt.input)
+			}
+		})
+	}
+}
