@@ -56,14 +56,14 @@ func (r repositoryService) CloneAndValidateRepository(url string, stdin io.Reade
 		cloneOptions.Auth = publicKeys
 	}
 
-	_, err := git.PlainClone("nvim", false, cloneOptions)
+	_, err := git.PlainClone(DirectoryNameForClonnedRepository, false, cloneOptions)
 	if err != nil {
 		return fmt.Errorf("clone repository: %w", err)
 	}
 
-	err = r.validator.ValidateRepoFiles("nvim")
+	err = r.validator.ValidateRepoFiles(DirectoryNameForClonnedRepository)
 	if err != nil {
-		removeErr := os.RemoveAll("nvim")
+		removeErr := os.RemoveAll(DirectoryNameForClonnedRepository)
 		if removeErr != nil {
 			return fmt.Errorf("repository validation failed, failed to remove repository: %w", err)
 		}

@@ -25,7 +25,7 @@ func Run(srv service.Services) {
 		os.Exit(0)
 	}
 
-	successfulCommand("All utilities are installed....")
+	successfulMessage("All utilities are installed....")
 
 	err := srv.File.DeleteConfigOrStopInstallation(os.Stdin)
 	if err != nil && !errors.Is(err, service.ErrConfigNotFound) {
@@ -36,7 +36,7 @@ func Run(srv service.Services) {
 		errs.WrapError("Failed to delete config or stop installation!", err)
 	}
 	if !errors.Is(err, service.ErrConfigNotFound) {
-		successfulCommand("Successfully remove old nvim config...")
+		successfulMessage("Successfully remove old nvim config...")
 	}
 
 	url, err := srv.Repository.ProcessUserURL(os.Stdin)
@@ -44,7 +44,7 @@ func Run(srv service.Services) {
 		errs.WrapError("Validation for URL failed! Please try again... ", err)
 	}
 
-	successfulCommand("URL is valid...")
+	successfulMessage("URL is valid...")
 
 	err = srv.Repository.CloneAndValidateRepository(url, os.Stdin)
 	if err != nil {
@@ -55,14 +55,25 @@ func Run(srv service.Services) {
 		errs.WrapError("Failed to clone repository or validate repository!", err)
 	}
 
-	successfulCommand("Repository successfully cloned and checked for base files")
+	successfulMessage("Repository successfully cloned and checked for base files")
 
-	err = srv.File.ExtractAndMoveConfigDirectory("./nvim")
+	repositoryPath := fmt.Sprintf("./%s", service.DirectoryNameForClonnedRepository)
+	err = srv.File.ExtractAndMoveConfigDirectory(repositoryPath)
 	if err != nil {
+		deleteErr := srv.File.DeleteRepositoryDirectory(repositoryPath)
+		if deleteErr != nil {
+			warningMessage("Could not delete clonned repository")
+		}
+
 		errs.WrapError("Failed to extract and move config directory from repository", err)
 	}
 
-	successfulCommand("Config successfully extracted and moved to '.config' directory!")
+	deleteErr := srv.File.DeleteRepositoryDirectory(repositoryPath)
+	if deleteErr != nil {
+		warningMessage("Could not delete clonned repository")
+	}
+
+	successfulMessage("Config successfully extracted and moved to '.config' directory!")
 
 	message, count, err := srv.Manager.DetectInstalledPackageManagers()
 	if err != nil {
@@ -88,15 +99,20 @@ func Run(srv service.Services) {
 	}
 
 	if packageManger != "" {
-		successfulCommand(fmt.Sprintf("%s successfully installed", packageManger))
+		successfulMessage(fmt.Sprintf("%s successfully installed", packageManger))
 	}
 
 	colors.Green("Nvim successfully configured!")
 }
 
-// successfulCommand print message with green color and wait command timeout [3s].
-func successfulCommand(text string) {
+// successfulMessage print message with green color and wait input timeout.
+func successfulMessage(text string) {
 	colors.Green(text)
 
 	time.Sleep(commandTimeout)
+}
+
+// warningMessage print message with yellow color.
+func warningMessage(text string) {
+	colors.Yellow(text)
 }
