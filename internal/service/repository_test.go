@@ -1,105 +1,73 @@
 package service_test
 
 import (
-	"bytes"
-	"fmt"
 	"os"
 	"testing"
 
 	"github.com/VladPetriv/setup-neovim/internal/service"
-	"github.com/VladPetriv/setup-neovim/pkg/input"
 	"github.com/VladPetriv/setup-neovim/pkg/validation"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRepository_CloneAndValidateRepository(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with go-git
+func TestRepository_CloneRepository(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with go-git
 	t.Parallel()
 
-	testService := service.NewRepository(input.New(), validation.New())
+	testService := service.NewRepository(validation.New())
 
 	tests := []struct {
-		name          string
-		inputURL      string
-		inputFilePath string
-		wantErr       bool
+		name       string
+		url        string
+		sshKeyPath string
+		wantErr    bool
 	}{
 		{
-			name:          "CloneAndValidateRepository success with https URL [github]",
-			inputURL:      "https://github.com/jdhao/nvim-config.git",
-			inputFilePath: "",
+			name: "success with HTTPS URL [github]",
+			url:  "https://github.com/jdhao/nvim-config.git",
 		},
 		{
-			name:          "CloneAndValidateRepository success with https URL [gitlab]",
-			inputURL:      "https://gitlab.com/hantamkoding-dotfiles/neovim.git",
-			inputFilePath: "",
+			name: "success with HTTPS URL [gitlab]",
+			url:  "https://gitlab.com/hantamkoding-dotfiles/neovim.git",
 		},
 		{
-			name:          "CloneAndValidateRepository success with SSH URL",
-			inputURL:      "git@github.com:VladPetriv/nvim-config.git",
-			inputFilePath: ".ssh/id_ed25519",
+			name:       "success with SSH URL",
+			url:        "git@github.com:VladPetriv/nvim-config.git",
+			sshKeyPath: ".ssh/id_ed25519",
 		},
 		{
-			name:          "CloneAndValidateRepository fail with file validation",
-			inputURL:      "https://gitlab.com/VladPetriv/tg_scanner.git",
-			inputFilePath: "",
-			wantErr:       true,
-		},
-		{
-			name:          "CloneAndValidateRepository fail with error when create public key from file",
-			inputURL:      "git@github.com:VladPetriv/nvim-config.git",
-			inputFilePath: "",
-			wantErr:       true,
+			name:    "fails when SSH key file is missing",
+			url:     "git@github.com:VladPetriv/nvim-config.git",
+			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var stdin bytes.Buffer
-			stdin.Write([]byte(fmt.Sprintf("%s\n", tt.inputFilePath)))
-
-			err := testService.CloneAndValidateRepository(tt.inputURL, &stdin)
+			err := testService.CloneRepository(tt.url, tt.sshKeyPath)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
 
-			err = os.RemoveAll("./nvim")
-			if err != nil {
-				t.Fatal(err)
-			}
+			os.RemoveAll("./nvim")
 		})
 	}
 }
 
-func TestRepository_ProcessUserURL(t *testing.T) {
+func TestRepository_ValidateRepository(t *testing.T) {
 	t.Parallel()
 
-	testService := service.NewRepository(input.New(), validation.New())
+	testService := service.NewRepository(validation.New())
 
 	tests := []struct {
-		name        string
-		input       string
-		expectedURL string
-		expectedErr error
+		name    string
+		path    string
+		wantErr bool
 	}{
 		{
-			name:        "ProcessUserURL success with valid host[github]",
-			input:       "git@github.com:VladPetriv/setup-neovim.git",
-			expectedURL: "git@github.com:VladPetriv/setup-neovim.git",
-			expectedErr: nil,
-		},
-		{
-			name:        "ProcessUserURL success with valid host[gitlab]",
-			input:       "git@gitlab.com:gitlab-org/gitaly.git",
-			expectedURL: "git@gitlab.com:gitlab-org/gitaly.git",
-			expectedErr: nil,
-		},
-		{
-			name:        "ProcessUserURL fail with invalid host",
-			input:       "test",
-			expectedURL: "",
-			expectedErr: validation.ErrURLContainsInvalidHost,
+			name:    "fails when directory does not exist",
+			path:    "./nonexistent_repo",
+			wantErr: true,
 		},
 	}
 
@@ -107,12 +75,12 @@ func TestRepository_ProcessUserURL(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var stdin bytes.Buffer
-			stdin.Write([]byte(fmt.Sprintf("%s\n", tt.input)))
-
-			url, err := testService.ProcessUserURL(&stdin)
-			assert.Equal(t, tt.expectedErr, err)
-			assert.Equal(t, tt.expectedURL, url)
+			err := testService.ValidateRepository(tt.path)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 		})
 	}
 }

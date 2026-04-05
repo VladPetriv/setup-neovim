@@ -3,18 +3,16 @@ package service_test
 import (
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/VladPetriv/setup-neovim/internal/service"
-	"github.com/VladPetriv/setup-neovim/pkg/input"
 	"github.com/VladPetriv/setup-neovim/pkg/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFile_ExtractAndMoveConfigDirectory(t *testing.T) {
-	testService := service.NewFile(input.New(), validation.New())
+	testService := service.NewFile(validation.New())
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -90,10 +88,10 @@ func createDirectoryByType(directoryType string) error {
 	return nil
 }
 
-func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with dirs
+func TestFile_CheckConfigExists(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
 	t.Parallel()
 
-	testService := service.NewFile(input.New(), validation.New())
+	testService := service.NewFile(validation.New())
 
 	homeDir, err := os.UserHomeDir()
 	require.NoError(t, err)
@@ -101,92 +99,93 @@ func TestFile_DeleteConfigOrStopInstallation(t *testing.T) { //nolint:tparallel,
 	configPath := fmt.Sprintf("%s/.config/nvim", homeDir)
 
 	err = os.RemoveAll(configPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
-		name                        string
-		input                       string
-		shouldCreateConfigDirectory bool
-		want                        error
+		name         string
+		createConfig bool
+		wantExists   bool
 	}{
 		{
-			name:                        "successful with deleting of nvim config",
-			input:                       "y",
-			shouldCreateConfigDirectory: true,
-			want:                        nil,
+			name:         "returns true when config directory exists",
+			createConfig: true,
+			wantExists:   true,
 		},
 		{
-			name: "successful with not found nvim config",
-			want: service.ErrConfigNotFound,
-		},
-		{
-			name:                        "failed with stop of installation process",
-			input:                       "n",
-			shouldCreateConfigDirectory: true,
-			want:                        service.ErrStopInstallation,
-		},
-		{
-			name:                        "failed with invalid answer",
-			input:                       "invalid",
-			shouldCreateConfigDirectory: true,
-			want:                        service.ErrEnterValidAnswer,
+			name:       "returns false when config directory is absent",
+			wantExists: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			input := strings.NewReader(
-				fmt.Sprintf("%s\n", tt.input),
-			)
-
-			if tt.shouldCreateConfigDirectory {
+			if tt.createConfig {
 				err = os.MkdirAll(configPath, 0755)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 
 			t.Cleanup(func() {
-				if tt.shouldCreateConfigDirectory {
-					err = os.RemoveAll(configPath)
-					assert.NoError(t, err)
-				}
+				os.RemoveAll(configPath)
 			})
 
-			got := testService.DeleteConfigOrStopInstallation(input)
-			assert.Equal(t, tt.want, got)
+			var got bool
+			got, err = testService.CheckConfigExists()
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantExists, got)
 		})
 	}
 }
 
+func TestFile_DeleteConfig(t *testing.T) {
+	t.Parallel()
+
+	testService := service.NewFile(validation.New())
+
+	homeDir, err := os.UserHomeDir()
+	require.NoError(t, err)
+
+	configPath := fmt.Sprintf("%s/.config/nvim", homeDir)
+
+	err = os.MkdirAll(configPath, 0755)
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		os.RemoveAll(configPath)
+	})
+
+	err = testService.DeleteConfig()
+	assert.NoError(t, err)
+
+	_, err = os.Lstat(configPath)
+	assert.Error(t, err, "config directory should have been deleted")
+}
+
 func TestFile_DeleteRepositoryDirectory(t *testing.T) {
-	testService := service.NewFile(input.New(), validation.New())
+	testService := service.NewFile(validation.New())
 
 	tests := []struct {
 		name            string
 		input           string
-		wantErr         bool
 		createDirectory bool
 	}{
 		{
-			name:    "failed by directory not found",
-			input:   "./test_delete_not_found",
-			wantErr: true,
+			name:  "does nothing when path is empty",
+			input: "",
 		},
 		{
-			name:            "successful by deleting input directory",
+			name:            "successfully deletes existing directory",
 			input:           "./test_delete_found",
 			createDirectory: true,
 		},
 		{
-			name:  "successful by doing nothing due to empty directory path",
-			input: "",
+			name:  "does nothing when directory does not exist",
+			input: "./test_delete_not_found",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.createDirectory {
 				err := os.MkdirAll(tt.input, 0755)
-				if err != nil {
-					assert.NoError(t, err)
-				}
+				require.NoError(t, err)
 			}
 
 			got := testService.DeleteRepositoryDirectory(tt.input)

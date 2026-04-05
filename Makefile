@@ -21,4 +21,3 @@ install:
 .PHONY: uninstall
 uninstall:
 	bash ./scripts/uninstall.sh
-
