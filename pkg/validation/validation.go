@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -103,7 +104,7 @@ func (v validation) ValidateConsoleUtilities() map[string]string {
 
 	utils := [2]string{"nvim", "git"}
 	for _, util := range utils {
-		cmd := exec.Command(util, "--version")
+		cmd := exec.CommandContext(context.Background(), util, "--version")
 
 		if err := cmd.Run(); err != nil {
 			errors[util] = fmt.Sprintf("Please install %s before using setup nvim util", util)

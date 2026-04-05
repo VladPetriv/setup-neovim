@@ -65,7 +65,8 @@ func TestManager_DetectInstalledPackageManagers(t *testing.T) {
 				os.RemoveAll(fmt.Sprintf("%s/.local/share/nvim/site/autoload", homeDir))
 			})
 
-			detected, err := testService.DetectInstalledPackageManagers()
+			var detected []string
+			detected, err = testService.DetectInstalledPackageManagers()
 			assert.NoError(t, err)
 			assert.Len(t, detected, tt.wantCount)
 		})

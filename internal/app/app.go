@@ -27,33 +27,45 @@ func Run(srv service.Services) {
 
 	colors.Green("All utilities are installed....")
 
+	handleExistingConfig(srv)
+
+	url, sshKeyPath := promptForRepo(validator)
+	cloneAndInstallConfig(srv, url, sshKeyPath)
+	handlePackageManagerInstall(srv)
+}
+
+func handleExistingConfig(srv service.Services) {
 	exists, err := srv.File.CheckConfigExists()
 	if err != nil {
 		errs.WrapError("Failed to check for existing nvim config!", err)
 	}
 
-	if exists {
-		var confirm bool
-		err = huh.NewConfirm().
-			Title("Existing nvim config detected. Remove it to continue?").
-			Value(&confirm).
-			Run()
-		handlePromptErr(err)
-
-		if !confirm {
-			colors.Green("Thank you for using setup-nvim!")
-			os.Exit(0)
-		}
-
-		if err = srv.File.DeleteConfig(); err != nil {
-			errs.WrapError("Failed to delete existing nvim config!", err)
-		}
-
-		colors.Green("Successfully removed old nvim config...")
+	if !exists {
+		return
 	}
 
+	var confirm bool
+	err = huh.NewConfirm().
+		Title("Existing nvim config detected. Remove it to continue?").
+		Value(&confirm).
+		Run()
+	handlePromptErr(err)
+
+	if !confirm {
+		colors.Green("Thank you for using setup-nvim!")
+		os.Exit(0)
+	}
+
+	if err = srv.File.DeleteConfig(); err != nil {
+		errs.WrapError("Failed to delete existing nvim config!", err)
+	}
+
+	colors.Green("Successfully removed old nvim config...")
+}
+
+func promptForRepo(validator validation.Validator) (string, string) {
 	var url string
-	err = huh.NewInput().
+	err := huh.NewInput().
 		Title("Enter URL to your nvim config").
 		Validate(validator.ValidateURL).
 		Value(&url).
@@ -71,6 +83,10 @@ func Run(srv service.Services) {
 		handlePromptErr(err)
 	}
 
+	return url, sshKeyPath
+}
+
+func cloneAndInstallConfig(srv service.Services, url, sshKeyPath string) {
 	if err := srv.Repository.CloneRepository(url, sshKeyPath); err != nil {
 		errs.WrapError("Failed to clone repository!", err)
 	}
@@ -99,7 +115,9 @@ func Run(srv service.Services) {
 	}
 
 	colors.Green("Config successfully extracted and moved to '.config' directory!")
+}
 
+func handlePackageManagerInstall(srv service.Services) {
 	detected, err := srv.Manager.DetectInstalledPackageManagers()
 	if err != nil {
 		errs.WrapError("Failed to detect installed package managers!", err)

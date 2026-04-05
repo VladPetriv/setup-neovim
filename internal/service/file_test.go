@@ -127,14 +127,15 @@ func TestFile_CheckConfigExists(t *testing.T) { //nolint:tparallel // t.Parallel
 				os.RemoveAll(configPath)
 			})
 
-			got, err := testService.CheckConfigExists()
+			var got bool
+			got, err = testService.CheckConfigExists()
 			assert.NoError(t, err)
 			assert.Equal(t, tt.wantExists, got)
 		})
 	}
 }
 
-func TestFile_DeleteConfig(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with dirs
+func TestFile_DeleteConfig(t *testing.T) {
 	t.Parallel()
 
 	testService := service.NewFile(validation.New())

@@ -9,16 +9,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRepository_CloneRepository(t *testing.T) { //nolint:tparallel,lll // t.Parallel() causes conflicts with go-git
+func TestRepository_CloneRepository(t *testing.T) { //nolint:tparallel // t.Parallel() causes conflicts with go-git
 	t.Parallel()
 
 	testService := service.NewRepository(validation.New())
 
 	tests := []struct {
-		name        string
-		url         string
-		sshKeyPath  string
-		wantErr     bool
+		name       string
+		url        string
+		sshKeyPath string
+		wantErr    bool
 	}{
 		{
 			name: "success with HTTPS URL [github]",

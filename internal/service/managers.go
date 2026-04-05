@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -78,7 +79,7 @@ func installVimPlug() error {
 		return fmt.Errorf("write data to installation script file: %w", err)
 	}
 
-	cmd := exec.Command("/bin/sh", "vim-plug.sh")
+	cmd := exec.CommandContext(context.Background(), "/bin/sh", "vim-plug.sh")
 	if err = cmd.Run(); err != nil {
 		return fmt.Errorf("execute installation script file: %w", err)
 	}
@@ -108,7 +109,7 @@ func installPacker() error {
 		return fmt.Errorf("write data to installation script file: %w", err)
 	}
 
-	cmd := exec.Command("/bin/sh", "packer.sh")
+	cmd := exec.CommandContext(context.Background(), "/bin/sh", "packer.sh")
 	if err = cmd.Run(); err != nil {
 		return fmt.Errorf("execute installation script file: %w", err)
 	}

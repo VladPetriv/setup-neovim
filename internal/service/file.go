@@ -120,7 +120,11 @@ func checkIfConfigDirectoryIsExist() (bool, error) {
 
 	_, err = os.Lstat(fmt.Sprintf("%s/%s", homeDir, systemNeovimConfigPath))
 	if err != nil {
-		return false, nil
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+
+		return false, fmt.Errorf("check config existence: %w", err)
 	}
 
 	return true, nil

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/user/projects/opensource/setup-neovim log --oneline main..HEAD)",
+      "Bash(git -C /Users/user/projects/opensource/setup-neovim diff main --name-only)",
+      "Bash(go get:*)"
+    ]
+  }
+}
