@@ -3,54 +3,42 @@ package service
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
-	"github.com/VladPetriv/setup-neovim/pkg/input"
 	"github.com/VladPetriv/setup-neovim/pkg/validation"
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	gogitssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
 type repositoryService struct {
-	inputter  input.Inputter
 	validator validation.Validator
 }
 
-func NewRepository(inputter input.Inputter, validator validation.Validator) RepositoryService {
-	return &repositoryService{
-		inputter:  inputter,
-		validator: validator,
-	}
+func NewRepository(validator validation.Validator) RepositoryService {
+	return &repositoryService{validator: validator}
 }
 
-func (r repositoryService) ProcessUserURL(stdin io.Reader) (string, error) {
-	fmt.Print("Enter URL to your nvim config: ")
-
-	configURL, err := r.inputter.GetInput(stdin)
-	if err != nil {
-		return "", fmt.Errorf("get user input: %w", err)
-	}
-
-	err = r.validator.ValidateURL(configURL)
-	if err != nil {
-		return "", err
-	}
-
-	return configURL, nil
+// HasSSHURL reports whether the given URL uses SSH (git@) transport.
+func HasSSHURL(url string) bool {
+	return strings.Contains(url, "git@")
 }
 
-func (r repositoryService) CloneAndValidateRepository(url string, stdin io.Reader) error {
+func (r repositoryService) CloneRepository(url string, sshKeyPath string) error {
 	cloneOptions := &git.CloneOptions{
 		URL:      url,
 		Progress: os.Stdout,
 	}
 
-	if hasSSHURLParts(url) {
-		publicKeys, err := createPublicSSHKeysFromFile(r.inputter, stdin)
+	if HasSSHURL(url) {
+		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return fmt.Errorf("create public ssh key from file: %w", err)
+			return fmt.Errorf("get home directory: %w", err)
+		}
+
+		publicKeys, err := gogitssh.NewPublicKeysFromFile("git", fmt.Sprintf("%s/%s", homeDir, sshKeyPath), "")
+		if err != nil {
+			return fmt.Errorf("create ssh public keys: %w", err)
 		}
 
 		cloneOptions.Auth = publicKeys
@@ -61,9 +49,13 @@ func (r repositoryService) CloneAndValidateRepository(url string, stdin io.Reade
 		return fmt.Errorf("clone repository: %w", err)
 	}
 
-	err = r.validator.ValidateRepoFiles(DirectoryNameForClonnedRepository)
+	return nil
+}
+
+func (r repositoryService) ValidateRepository(path string) error {
+	err := r.validator.ValidateRepoFiles(path)
 	if err != nil {
-		removeErr := os.RemoveAll(DirectoryNameForClonnedRepository)
+		removeErr := os.RemoveAll(path)
 		if removeErr != nil {
 			return fmt.Errorf("repository validation failed, failed to remove repository: %w", err)
 		}
@@ -76,31 +68,4 @@ func (r repositoryService) CloneAndValidateRepository(url string, stdin io.Reade
 	}
 
 	return nil
-}
-
-func hasSSHURLParts(url string) bool {
-	return strings.Contains(url, "git@")
-}
-
-func createPublicSSHKeysFromFile(input input.Inputter, stdin io.Reader) (*ssh.PublicKeys, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("get home directory: %w", err)
-	}
-
-	fmt.Print("Enter path to your ssh file(.ssh/id_ed3122): ")
-
-	keyPath, err := input.GetInput(stdin)
-	if err != nil {
-		return nil, fmt.Errorf("get user input: %w", err)
-	}
-
-	filePath := fmt.Sprintf("%s/%s", homeDir, keyPath)
-
-	publicKeys, err := ssh.NewPublicKeysFromFile("git", filePath, "")
-	if err != nil {
-		return nil, fmt.Errorf("create ssh public keys: %w", err)
-	}
-
-	return publicKeys, nil
 }

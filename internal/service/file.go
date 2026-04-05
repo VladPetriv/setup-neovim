@@ -3,29 +3,31 @@ package service
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 
-	"github.com/VladPetriv/setup-neovim/pkg/input"
 	"github.com/VladPetriv/setup-neovim/pkg/validation"
 )
 
 type fileService struct {
-	inputter  input.Inputter
 	validator validation.Validator
 }
 
-func NewFile(inputter input.Inputter, validator validation.Validator) FileService {
-	return &fileService{
-		inputter:  inputter,
-		validator: validator,
-	}
+func NewFile(validator validation.Validator) FileService {
+	return &fileService{validator: validator}
 }
 
 func (f fileService) CheckUtilStatus() map[string]string {
 	return f.validator.ValidateConsoleUtilities()
+}
+
+func (f fileService) CheckConfigExists() (bool, error) {
+	return checkIfConfigDirectoryIsExist()
+}
+
+func (f fileService) DeleteConfig() error {
+	return deleteConfig()
 }
 
 func (f fileService) ExtractAndMoveConfigDirectory(repositoryPath string) error {
@@ -46,7 +48,20 @@ func (f fileService) ExtractAndMoveConfigDirectory(repositoryPath string) error 
 	return nil
 }
 
-// getConfigPath is used to get the path to the nvim config within the repository.
+func (f fileService) DeleteRepositoryDirectory(path string) error {
+	if path == "" {
+		return nil
+	}
+
+	err := os.RemoveAll(path)
+	if err != nil {
+		return fmt.Errorf("remove directory by path: %w", err)
+	}
+
+	return nil
+}
+
+// getConfigPath returns the path to the nvim config within the cloned repository.
 func getConfigPath(repositoryPath string) (string, error) {
 	var dirPath string
 	var filesCount int
@@ -97,42 +112,6 @@ func moveConfigDirectory(configPath string) error {
 	return nil
 }
 
-const (
-	positiveAnswer = "y"
-	negativeAnswer = "n"
-)
-
-func (f fileService) DeleteConfigOrStopInstallation(stdin io.Reader) error {
-	exist, err := checkIfConfigDirectoryIsExist()
-	if err != nil {
-		// NOTE: When directory with config not found we need to continue installation process
-		if !errors.Is(err, ErrDirectoryNotFound) {
-			return fmt.Errorf("check if config directory already exist: %w", err)
-		}
-	}
-
-	// directory not found we should continue installation
-	if !exist {
-		return ErrConfigNotFound
-	}
-
-	fmt.Printf("Already installed neovim config detected...\nDo you want to remove it for continue installation?(y/n):")
-	shouldStopOrContinueInstallation, err := f.inputter.GetInput(stdin)
-	if err != nil {
-		return fmt.Errorf("get user input: %w", err)
-	}
-
-	switch shouldStopOrContinueInstallation {
-	case positiveAnswer:
-		return deleteConfig()
-	case negativeAnswer:
-		return ErrStopInstallation
-	default:
-		return ErrEnterValidAnswer
-	}
-}
-
-// checkIfConfigDirectoryIsExist checks if config directory existed by default path.
 func checkIfConfigDirectoryIsExist() (bool, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -141,7 +120,7 @@ func checkIfConfigDirectoryIsExist() (bool, error) {
 
 	_, err = os.Lstat(fmt.Sprintf("%s/%s", homeDir, systemNeovimConfigPath))
 	if err != nil {
-		return false, ErrDirectoryNotFound
+		return false, nil
 	}
 
 	return true, nil
@@ -155,20 +134,7 @@ func deleteConfig() error {
 
 	err = os.RemoveAll(fmt.Sprintf("%s/%s", homeDir, systemNeovimConfigPath))
 	if err != nil {
-		return fmt.Errorf("remove existed config directory: %w", err)
-	}
-
-	return nil
-}
-
-func (f fileService) DeleteRepositoryDirectory(path string) error {
-	if path == "" {
-		return nil
-	}
-
-	err := os.RemoveAll(path)
-	if err != nil {
-		return fmt.Errorf("remove directory by path: %w", err)
+		return fmt.Errorf("remove existing config directory: %w", err)
 	}
 
 	return nil
